@@ -1,5 +1,5 @@
 import { decodeGrant, openDelivery, unwrapWith } from '@filoz/keysmith'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { type Hex, toHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { envelopeInCar, inspectBytes, type View } from './inspector/describe.ts'
@@ -14,6 +14,17 @@ const toBase64Url = (bytes: Uint8Array) =>
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '')
+
+/** Scrolls `pane` (not the page) so the span from `first` to `last` shows, centred if it fits; leaves it if any of it shows. */
+function reveal(pane: HTMLElement, first: Element, last: Element) {
+  const view = pane.getBoundingClientRect()
+  const top = first.getBoundingClientRect().top
+  const bottom = last.getBoundingClientRect().bottom
+  if (top < view.bottom && bottom > view.top) return
+  const height = bottom - top
+  const offset = height < view.height ? (view.height - height) / 2 : 8
+  pane.scrollTo({ top: pane.scrollTop + top - view.top - offset })
+}
 
 function title(view: View): string {
   switch (view.kind) {
@@ -133,6 +144,27 @@ export function Inspector() {
     return byte
   }, [view])
   const activeField = active != null ? view?.fields[active] : undefined
+
+  // Hovering one pane brings the matching part of the other into view.
+  const hexPane = useRef<HTMLDivElement>(null)
+  const fieldsPane = useRef<HTMLOListElement>(null)
+  const [hoverIn, setHoverIn] = useState<'hex' | 'fields'>('hex')
+  const hover = (pane: 'hex' | 'fields', field: number | null) => {
+    setHoverIn(pane)
+    setActive(field)
+  }
+  useEffect(() => {
+    if (active == null || !activeField) return
+    if (hoverIn === 'hex') {
+      const item = fieldsPane.current?.children[active]
+      if (item) reveal(fieldsPane.current!, item, item)
+    } else if (hexPane.current && activeField.start < SHOWN) {
+      const byte = (at: number) => hexPane.current!.querySelector(`[data-at="${at}"]`)
+      const first = byte(activeField.start)
+      const last = byte(Math.min(activeField.end, SHOWN, input?.bytes.length ?? 0) - 1) ?? first
+      if (first && last) reveal(hexPane.current, first, last)
+    }
+  }, [active, activeField, hoverIn, input])
 
   return (
     <div className="stack">
@@ -255,7 +287,7 @@ export function Inspector() {
             <p className="notice notice-ok">Keysmith's strict decoder accepts it. Signatures are not checked here.</p>
           ) : null}
           <div className="bytes-view">
-            <div className="hex" onMouseLeave={() => setActive(null)}>
+            <div className="hex" ref={hexPane} onMouseLeave={() => setActive(null)}>
               {Array.from({ length: Math.ceil(Math.min(input.bytes.length, SHOWN) / 16) }, (_, row) => (
                 <div key={row} className="hex-row">
                   <span className="offset">{(row * 16).toString(16).padStart(4, '0')}</span>
@@ -265,7 +297,12 @@ export function Inspector() {
                     const group = owner != null ? view.fields[owner]?.group : 'none'
                     const lit = activeField && at >= activeField.start && at < activeField.end
                     return (
-                      <span key={at} className={`byte g-${group}${lit ? ' lit' : ''}`} onMouseEnter={() => setActive(owner ?? null)}>
+                      <span
+                        key={at}
+                        data-at={at}
+                        className={`byte g-${group}${lit ? ' lit' : ''}`}
+                        onMouseEnter={() => hover('hex', owner ?? null)}
+                      >
                         {byte.toString(16).padStart(2, '0')}
                       </span>
                     )
@@ -274,12 +311,12 @@ export function Inspector() {
               ))}
               {input.bytes.length > SHOWN ? <div className="muted small">… {input.bytes.length - SHOWN} more bytes</div> : null}
             </div>
-            <ol className="fields" onMouseLeave={() => setActive(null)}>
+            <ol className="fields" ref={fieldsPane} onMouseLeave={() => setActive(null)}>
               {view.fields.map((f, i) => (
                 <li
                   key={`${f.start}:${f.label}`}
                   className={`g-${f.group} depth-${Math.min(f.depth, 4)}${active === i ? ' lit' : ''}`}
-                  onMouseEnter={() => setActive(i)}
+                  onMouseEnter={() => hover('fields', i)}
                 >
                   <span className="field-name">{f.label}</span>
                   {f.value ? <span className="mono field-value">{f.value}</span> : null}

@@ -90,6 +90,9 @@ textarea, input[type="text"] { font: 13px/1.45 var(--mono); color: var(--text); 
 .fields li > .small { grid-column: 1 / -1; }
 .field-name { font-weight: 600; }
 .field-value { overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: no-preference) {
+  .hex, .fields { scroll-behavior: smooth; }
+}
 .fields li.lit, .byte.lit { outline: 2px solid var(--accent); outline-offset: -2px; }
 /* one tint per kind of byte, the same in the hex and the field list */
 .g-structure { background: var(--surface-2); }
