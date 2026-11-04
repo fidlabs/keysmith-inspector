@@ -139,3 +139,11 @@ test('every sample inspects, and its keys open it', async () => {
     assert.equal(decodeDelivery(grant.bytes).chain.links.length, links)
   }
 })
+
+test('a claim chain or request with a nonsense expiry still inspects', () => {
+  const hex = (s: string) => Uint8Array.from(s.match(/../g)!, (b) => parseInt(b, 16))
+  for (const bytes of ['830181a10b617840', '830180a1011bffffffffffffffff']) {
+    const view = inspectBytes(hex(bytes))
+    assert.ok(view.fields.some((f) => f.value?.includes('not a valid time')))
+  }
+})

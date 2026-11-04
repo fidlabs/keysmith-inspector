@@ -285,7 +285,10 @@ const REQUEST_FIELDS: Record<number, { label: string; group: Group; note: string
   2: { label: 'sig (2)', group: 'tag', note: "EIP-712 ReadRequest signature by the chain's final bearer" },
 }
 
-const iso = (seconds: unknown) => new Date(Number(seconds) * 1000).toISOString()
+const iso = (seconds: unknown) => {
+  const date = new Date(Number(seconds) * 1000)
+  return Number.isNaN(date.getTime()) ? 'not a valid time' : date.toISOString()
+}
 
 /** The claim chain: one entry per link, root first. */
 function chainFields(chain: CborNode): Field[] {

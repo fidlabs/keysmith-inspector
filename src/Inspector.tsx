@@ -180,6 +180,8 @@ export function Inspector() {
               if (!event.target.checked) {
                 setKeyText('')
                 if (input?.key) setInput(null)
+                const typed = parseText(pasted, { danger: true })
+                if (typed.ok && typed.key) setPasted('')
               }
             }}
           />
