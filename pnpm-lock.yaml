@@ -15,8 +15,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(viem@2.57.16(typescript@7.0.2)(zod@4.6.7))
       cborg:
-        specifier: ^5.1.11
-        version: 5.1.11
+        specifier: ^6.2.1
+        version: 6.2.1
       filecoin-encryption-envelope:
         specifier: 0.1.0
         version: 0.1.0
@@ -407,10 +407,6 @@ packages:
         optional: true
       zod:
         optional: true
-
-  cborg@5.1.11:
-    resolution: {integrity: sha512-oc6Pzg/gkTobxHZNgMmny+G99dOeBMbAmnGHcZWMKtolxZBIVwfi0Pj0khxEtNU8HMFdbT5sK0HmtgecDUPP0A==}
-    hasBin: true
 
   cborg@6.1.2:
     resolution: {integrity: sha512-hQfFh6FuuCDoycN68FtUpjtQx5kCtxOLA8msbpJZxjtxaMqxgHl+4GNwO+0YexH/lHmVzhhAKa0ua+vtmTRoVw==}
@@ -855,8 +851,6 @@ snapshots:
     optionalDependencies:
       typescript: 7.0.2
       zod: 4.6.7
-
-  cborg@5.1.11: {}
 
   cborg@6.1.2: {}
 

@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@filoz/keysmith": "^0.1.0",
-    "cborg": "^5.1.11",
+    "cborg": "^6.2.1",
     "filecoin-encryption-envelope": "0.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
