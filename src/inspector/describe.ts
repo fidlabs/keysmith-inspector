@@ -88,6 +88,48 @@ export function inspectBytes(bytes: Uint8Array): View {
   return { kind: 'unknown', fields: [field('CBOR item', root, 0, 'structure')], reason: 'Neither a FEE envelope (CBOR tag 16 or 96), a Keysmith grant (a CBOR map), nor a delivery or presentation (an array).' }
 }
 
+/**
+ * The FEE envelope inside a CAR: an encrypted upload as filecoin-pin stores it and a gateway serves it
+ * (a UnixFS file, encrypted.fee). Returns the first block that starts with a FEE tag, or null.
+ */
+export function envelopeInCar(bytes: Uint8Array): { bytes: Uint8Array; offset: number; block: number } | null {
+  if (!looksLikeCar(bytes)) return null
+  let at = 0
+  const varint = () => {
+    let value = 0
+    for (let shift = 0; ; shift += 7) {
+      const byte = bytes[at++]
+      if (byte === undefined) throw new Error('truncated')
+      value += (byte & 0x7f) * 2 ** shift
+      if ((byte & 0x80) === 0) return value
+    }
+  }
+  try {
+    const header = varint()
+    at += header
+    for (let block = 1; at < bytes.length; block++) {
+      const length = varint()
+      const end = at + length
+      if (end > bytes.length) return null
+      // The block's CID: v0 is a bare sha2-256 multihash; v1 is version, codec, then the multihash.
+      if (bytes[at] === 0x12 && bytes[at + 1] === 0x20) at += 34
+      else {
+        varint() // version
+        varint() // codec
+        varint() // multihash code
+        const digest = varint() // read before adding: `at += varint()` would add to the old `at`
+        at += digest
+      }
+      const data = bytes.subarray(at, end)
+      if ((data[0] === 0xd8 && data[1] === 96) || data[0] === 0xd0) return { bytes: data, offset: at, block }
+      at = end
+    }
+  } catch {
+    // a truncated or malformed CAR: no envelope found
+  }
+  return null
+}
+
 /** A CARv1 starts with a varint length, then a CBOR map holding `version` and `roots`. */
 function looksLikeCar(bytes: Uint8Array): boolean {
   let at = 0

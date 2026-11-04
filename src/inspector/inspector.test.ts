@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { encodeDelivery, grantDescriptor, newSalt, openDelivery, pieceKey, pieceMetadata, publicKeyOf, rootClaim, wrapTo } from '@filoz/keysmith'
+import { decodeDelivery, encodeDelivery, grantDescriptor, newSalt, openDelivery, pieceKey, pieceMetadata, publicKeyOf, rootClaim, unwrapWith, wrapTo } from '@filoz/keysmith'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import * as fee from 'filecoin-encryption-envelope'
-import { inspectBytes } from './describe.ts'
+import SAMPLES from '../samples.json' with { type: 'json' }
+import { envelopeInCar, inspectBytes } from './describe.ts'
 import { parseText } from './input.ts'
 
 // filecoin-pin#788's golden Grant (Anvil keys), and the FOC-Grant header of Example 1 in keysmith's claim vectors.
@@ -33,16 +34,17 @@ test('a FOC-Grant header is a presentation with its request', () => {
   assert.ok(view.kind === 'presentation' && !view.strictError && view.request && view.chain?.links.length === 2)
 })
 
-test('a share link shows its delivery, and never decodes an Access key it carries', () => {
-  const delivery = GRANT.slice('fgr1_'.length)
-  const link = `https://viewer.example/#v1/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi/${delivery}`
-  const plain = parsed(link)
+test('a share link, as filecoin-pin writes it, shows its grant and never decodes an Access key unless asked', () => {
+  const open = SAMPLES[1]!.items[0]!.text
+  const restricted = SAMPLES[2]!.items[0]!.text
+  const plain = parsed(restricted)
   assert.equal(inspectBytes(plain.bytes).kind, 'grant')
   assert.match(plain.notes.join(' '), /sent separately/)
-  const restricted = parsed(`${link}/fak1_${'A'.repeat(43)}`)
-  assert.match(restricted.notes.join(' '), /carries its Access key/)
-  assert.match(parsed(`${link}/pw1.${'B'.repeat(22)}`).notes.join(' '), /Password mode/)
-  assert.equal(parseText(link.replace('#v1/', '#v9/')).ok, false)
+  const carried = parsed(open)
+  assert.match(carried.notes.join(' '), /carries its Access key.*not decoded/)
+  assert.equal(carried.key, undefined)
+  assert.equal(parseText(restricted.replace('#v1/', '#v9/')).ok, false)
+  assert.equal(parseText(`${restricted}&x=1`).ok, false)
 })
 
 test('private keys are refused, however they are pasted', () => {
@@ -76,7 +78,7 @@ test('danger mode decodes keys, and opens a restricted share link with its Acces
   })
   const delivery = encodeDelivery(chain, await wrapTo(publicKeyOf(accessKey), nodeKey, grantDescriptor(ref, 'keyspace')))
   const b64 = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64url')
-  const link = `#v1/bafyroot/${b64(delivery)}/fak1_${b64(Buffer.from(accessKey.slice(2), 'hex'))}`
+  const link = `#v1/bafyroot&d=${b64(delivery)}&k=fak1_${b64(Buffer.from(accessKey.slice(2), 'hex'))}`
 
   const opened = parseText(link, { danger: true })
   assert.ok(opened.ok && opened.key === accessKey && !opened.keyOnly)
@@ -110,4 +112,30 @@ test('a CAR file is explained rather than misread', () => {
   const view = inspectBytes(car)
   assert.equal(view.kind, 'unknown')
   assert.match(view.kind === 'unknown' ? view.reason : '', /CAR file/)
+})
+
+test('every sample inspects, and its keys open it', async () => {
+  // The upload: an outer CAR whose block is the FEE envelope, labelled with the owner's keyspace.
+  const car = parsed(SAMPLES[0]!.items[0]!.text).bytes
+  const inner = envelopeInCar(car)
+  assert.ok(inner)
+  const piece = inspectBytes(inner.bytes)
+  assert.ok(piece.kind === 'piece' && piece.metadata?.['foc/salt'])
+
+  // The open link carries its key; the restricted one opens with the detached Access key.
+  const open = parseText(SAMPLES[1]!.items[0]!.text, { danger: true })
+  const restricted = parseText(SAMPLES[2]!.items[0]!.text, { danger: true })
+  const access = parseText(SAMPLES[2]!.items[1]!.text, { danger: true })
+  assert.ok(open.ok && open.key && restricted.ok && !restricted.key && access.ok && access.key)
+  assert.deepEqual(await unwrapWith(open.key, open.bytes), await unwrapWith(access.key, restricted.bytes))
+
+  // The Grants: one link for keyspace and for scope:team, two for the nested chain.
+  for (const [i, node, links] of [[3, 'keyspace', 1], [4, 'scope:team', 1], [5, 'scope:team/alice', 2]] as const) {
+    const grant = parsed(SAMPLES[i]!.items[0]!.text)
+    const key = parseText(SAMPLES[i]!.items[1]!.text, { danger: true })
+    assert.ok(key.ok && key.key)
+    const { claim } = await openDelivery(key.key, grant.bytes)
+    assert.equal(claim.node, node)
+    assert.equal(decodeDelivery(grant.bytes).chain.links.length, links)
+  }
 })

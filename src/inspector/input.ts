@@ -61,30 +61,42 @@ export function bytesFromText(text: string): Uint8Array {
   return decodeBase64(clean)
 }
 
-/** A share link's fragment: `v1/<root cid>/<delivery>[/<secret>]` (filecoin-pin#779). */
+/** A share link's fragment, as filecoin-pin writes it: `v1/<root cid>&d=<grant>[&k=<Access key>]`. */
 function parseShareLink(fragment: string, danger: boolean): Parsed {
-  const [version, rootCid, delivery, secret, ...rest] = fragment.split('/')
+  const version = fragment.slice(0, fragment.indexOf('/'))
   if (version !== 'v1') return { ok: false, refusal: `An unknown share link version: ${JSON.stringify(version)}.` }
-  if (!rootCid || !delivery || rest.length > 0) return { ok: false, refusal: 'A v1 share link, but not of the form v1/<root cid>/<delivery>[/<secret>].' }
-  const notes = [`Share link v1 for the upload with encrypted root CID ${rootCid}.`]
-  let key: Hex | undefined
-  if (secret?.startsWith('fak1_') && danger) {
-    const access = parseText(secret, { danger })
-    if (!access.ok) return access
-    key = access.key
-    notes.push('This link carries its Access key (a restricted link): anyone who has the link can read the upload. Opening it with that key.')
-  } else if (secret?.startsWith('fak1_')) {
-    notes.push(
-      'This link carries its Access key (a restricted link): anyone who has the link can read the upload. The key was not decoded or shown. Treat the link itself as a secret.'
-    )
-  } else if (secret?.startsWith('pw1.')) {
-    notes.push('Password mode: the link carries the password salt. The password is not in the link.')
-  } else if (secret) {
-    notes.push(`The link ends with an unknown secret form (${JSON.stringify(secret.slice(0, 5))}…), which was ignored.`)
-  } else {
-    notes.push('The Access key is not in the link: it is sent separately.')
+  const [rootCid, ...params] = fragment.slice('v1/'.length).split('&')
+  const values = new Map<string, string>()
+  for (const param of params) {
+    const at = param.indexOf('=')
+    const name = at < 0 ? param : param.slice(0, at)
+    if (!['d', 'k'].includes(name) || values.has(name)) return { ok: false, refusal: `A v1 share link with an unexpected part: ${JSON.stringify(name)}.` }
+    values.set(name, param.slice(at + 1))
   }
-  return { ok: true, bytes: decodeBase64(delivery), source: 'share link delivery', notes, key }
+  const grant = values.get('d')
+  const access = values.get('k')
+  if (!rootCid || !grant) return { ok: false, refusal: 'A v1 share link, but not of the form v1/<root cid>&d=<grant>[&k=<Access key>].' }
+  let bytes: Uint8Array
+  try {
+    bytes = decodeBase64(grant)
+  } catch {
+    return { ok: false, refusal: 'A v1 share link whose d= part is not base64url.' }
+  }
+  const notes = [`Share link v1 for the upload with root CID ${rootCid}. It carries a grant wrapped to the link's Access key.`]
+  let key: Hex | undefined
+  if (access != null) {
+    const open = parseText(access, { danger })
+    if (danger && !open.ok) return open
+    key = open.ok ? open.key : undefined
+    notes.push(
+      `An open link: it carries its Access key (k=), so anyone who has the link can open the upload. Treat the link itself as a secret. ${
+        danger ? 'Opening it with that key.' : 'The key was not decoded or shown.'
+      }`
+    )
+  } else {
+    notes.push(`A restricted link: its Access key is sent separately.${danger ? ' Paste it into the key box to open it.' : ''}`)
+  }
+  return { ok: true, bytes, source: 'share link grant', notes, key }
 }
 
 export function parseText(raw: string, { danger = false }: Options = {}): Parsed {
@@ -118,8 +130,8 @@ export function parseText(raw: string, { danger = false }: Options = {}): Parsed
     }
     return keyResult(bytes, 'Access key (fak1_)', 'This is an Access key (fak1_…): the private key that opens a share link.', danger)
   }
-  const hash = text.indexOf('#v1/')
-  if (hash !== -1 || text.startsWith('v1/')) return parseShareLink(hash === -1 ? text : text.slice(hash + 1), danger)
+  const link = /(?:^|#)(v\d+\/.*)$/s.exec(text)
+  if (link) return parseShareLink(link[1] as string, danger)
 
   const header = /^(Authorization:\s*)?FOC-Grant\s+(\S+)$/i.exec(text)
   if (header) {

@@ -1,9 +1,10 @@
-import { openDelivery } from '@filoz/keysmith'
+import { decodeGrant, openDelivery, unwrapWith } from '@filoz/keysmith'
 import { useEffect, useMemo, useState } from 'react'
 import { type Hex, toHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { inspectBytes, type View } from './inspector/describe.ts'
+import { envelopeInCar, inspectBytes, type View } from './inspector/describe.ts'
 import { parseText } from './inspector/input.ts'
+import { Samples } from './Samples.tsx'
 
 /** Bytes shown in the hex view; the field list still covers everything. */
 const SHOWN = 4096
@@ -31,8 +32,8 @@ function title(view: View): string {
   }
 }
 
-/** Danger mode: what a private key is, and what it opens. */
-function KeyPanel({ privateKey, delivery }: { privateKey: Hex; delivery?: Uint8Array }) {
+/** Danger mode: what a private key is, and what it opens (a delivery with its claim chain, or a bare grant). */
+function KeyPanel({ privateKey, grant }: { privateKey: Hex; grant?: { bytes: Uint8Array; chained: boolean } }) {
   const account = useMemo(() => {
     try {
       return privateKeyToAccount(privateKey)
@@ -40,15 +41,19 @@ function KeyPanel({ privateKey, delivery }: { privateKey: Hex; delivery?: Uint8A
       return null
     }
   }, [privateKey])
+  const { bytes, chained } = grant ?? {}
   const [opened, setOpened] = useState<{ key?: Hex; node?: string; error?: string } | null>(null)
   useEffect(() => {
     setOpened(null)
-    if (!delivery || !account) return
-    openDelivery(privateKey, delivery).then(
-      ({ key, claim }) => setOpened({ key: toHex(key), node: claim.node }),
+    if (!bytes || !account) return
+    const opening = chained
+      ? openDelivery(privateKey, bytes).then(({ key, claim }) => ({ key, node: claim.node }))
+      : unwrapWith(privateKey, bytes).then((key) => ({ key, node: decodeGrant(bytes).node }))
+    opening.then(
+      ({ key, node }) => setOpened({ key: toHex(key), node }),
       (err: Error) => setOpened({ error: err.message })
     )
-  }, [privateKey, delivery, account])
+  }, [privateKey, bytes, chained, account])
 
   return (
     <div className="notice notice-error stack">
@@ -73,11 +78,11 @@ function KeyPanel({ privateKey, delivery }: { privateKey: Hex; delivery?: Uint8A
       )}
       {opened?.key ? (
         <span className="small">
-          <span className="muted">Opens the delivery. Unwrapped key for node {JSON.stringify(opened.node)}: </span>
+          <span className="muted">Opens it. Unwrapped key for node {JSON.stringify(opened.node)}: </span>
           <span className="mono-wrap">{opened.key}</span>
         </span>
       ) : null}
-      {opened?.error ? <span className="small">Does not open the delivery: {opened.error}</span> : null}
+      {opened?.error ? <span className="small">Does not open it: {opened.error}</span> : null}
     </div>
   )
 }
@@ -96,6 +101,14 @@ export function Inspector() {
     setError(null)
     setActive(null)
     setCopied(false)
+    const inner = envelopeInCar(bytes)
+    if (inner) {
+      notes = [
+        ...notes,
+        `A CAR of ${bytes.length} B, as filecoin-pin stores an encrypted upload. Showing the FEE envelope (encrypted.fee) in its block ${inner.block}, from byte ${inner.offset}; if the file spans several blocks, this is only the first. The envelope's ciphertext is the inner CAR of the original files.`,
+      ]
+      bytes = inner.bytes
+    }
     setInput({ bytes, source, notes, key, keyOnly })
   }
   const loadFile = (file: File) =>
@@ -103,9 +116,9 @@ export function Inspector() {
       (buffer) => load(new Uint8Array(buffer), file.name),
       (err: Error) => setError(err.message)
     )
-  const inspectPasted = () => {
-    const parsed = parseText(pasted, { danger })
-    const key = danger && keyText.trim() ? parseText(keyText, { danger }) : null
+  const inspect = (text: string, keyBox: string) => {
+    const parsed = parseText(text, { danger })
+    const key = danger && keyBox.trim() ? parseText(keyBox, { danger }) : null
     if (!parsed.ok || (key && !(key.ok && key.keyOnly))) {
       setInput(null)
       setError(!parsed.ok ? parsed.refusal : key && !key.ok ? `Key box: ${key.refusal}` : 'Key box: that is not a private key.')
@@ -196,7 +209,7 @@ export function Inspector() {
               </label>
             ) : null}
             <div className="row">
-              <button type="button" className="button primary" disabled={!pasted.trim()} onClick={inspectPasted}>
+              <button type="button" className="button primary" disabled={!pasted.trim()} onClick={() => inspect(pasted, keyText)}>
                 Inspect
               </button>
             </div>
@@ -205,7 +218,9 @@ export function Inspector() {
       </div>
       {error ? <p className="notice notice-error">{error}</p> : null}
 
-      {input?.key ? <KeyPanel privateKey={input.key} delivery={!input.keyOnly && view?.kind === 'grant' ? input.bytes : undefined} /> : null}
+      {input?.key ? (
+        <KeyPanel privateKey={input.key} grant={!input.keyOnly && view?.kind === 'grant' ? { bytes: input.bytes, chained: !!view.chain } : undefined} />
+      ) : null}
 
       {input && view && !input.keyOnly ? (
         <>
@@ -283,6 +298,19 @@ export function Inspector() {
           ) : null}
         </>
       ) : null}
+
+      <Samples
+        danger={danger}
+        onInspect={(text) => {
+          setPasted(text)
+          inspect(text, keyText)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }}
+        onUseKey={(text) => {
+          setKeyText(text)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }}
+      />
     </div>
   )
 }
