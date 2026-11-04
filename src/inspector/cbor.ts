@@ -33,7 +33,8 @@ export function parseCbor(bytes: Uint8Array, offset = 0): CborNode {
     for (let i = 0; i < size; i++) n = (n << 8n) | BigInt(bytes[at + i])
     at += size
     arg = n <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(n) : n
-  } else throw new Error(info === 31 ? 'indefinite-length CBOR: not a FEE envelope or Keysmith grant' : 'malformed CBOR')
+  } else
+    throw new Error(info === 31 ? 'indefinite-length CBOR: not a FEE envelope or Keysmith grant' : 'malformed CBOR')
   const count = Number(arg)
   switch (major) {
     case 0:
@@ -44,7 +45,13 @@ export function parseCbor(bytes: Uint8Array, offset = 0): CborNode {
     case 3: {
       if (at + count > bytes.length) throw new Error('CBOR ends early')
       const content = bytes.subarray(at, at + count)
-      return { start: offset, head: at, end: at + count, major, value: major === 2 ? content : new TextDecoder().decode(content) }
+      return {
+        start: offset,
+        head: at,
+        end: at + count,
+        major,
+        value: major === 2 ? content : new TextDecoder().decode(content),
+      }
     }
     case 4: {
       const items: CborNode[] = []
