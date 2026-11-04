@@ -26,7 +26,8 @@ export function Samples({
     <details className="samples">
       <summary>Test data to try</summary>
       <p className="muted small">
-        Made with throwaway keys for an upload that is stored nowhere. The keys below are test keys: paste them only with Danger mode on, into the key box.
+        Made with throwaway keys for an upload that is stored nowhere. The keys below are test keys: paste them only
+        with Danger mode on, into the key box.
       </p>
       {samples.map((sample) => (
         <section key={sample.title} className="stack sample">
@@ -59,7 +60,11 @@ export function Samples({
                     </button>
                   )}
                   {'file' in item && item.file ? (
-                    <button type="button" className="button ghost compact" onClick={() => download(item.file, item.text)}>
+                    <button
+                      type="button"
+                      className="button ghost compact"
+                      onClick={() => download(item.file, item.text)}
+                    >
                       Download {item.file}
                     </button>
                   ) : null}

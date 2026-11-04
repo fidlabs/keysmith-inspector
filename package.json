@@ -14,17 +14,20 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "tsc --noEmit",
-    "test": "node --test 'src/**/*.test.ts'"
+    "test": "node --test 'src/**/*.test.ts'",
+    "lint": "biome ci .",
+    "format": "biome check --write ."
   },
   "dependencies": {
     "@filoz/keysmith": "^0.1.0",
-    "cborg": "^5.1.11",
+    "cborg": "^6.2.1",
     "filecoin-encryption-envelope": "0.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "viem": "^2.21.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.15",
     "@types/node": "^24.0.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

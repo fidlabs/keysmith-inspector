@@ -26,7 +26,8 @@ const toHex = (bytes: Uint8Array) => `0x${Array.from(bytes, (b) => b.toString(16
 /** A private key as bytes, in danger mode, or the refusal. */
 function keyResult(bytes: Uint8Array, source: string, refusal: string, danger: boolean): Parsed {
   if (!danger) return { ok: false, refusal: `${refusal} ${PRIVATE_KEY_REFUSAL}` }
-  if (bytes.length !== 32) return { ok: false, refusal: `${source} is ${bytes.length} bytes, not a 32-byte private key.` }
+  if (bytes.length !== 32)
+    return { ok: false, refusal: `${source} is ${bytes.length} bytes, not a 32-byte private key.` }
   return { ok: true, bytes, source, notes: [], key: toHex(bytes), keyOnly: true }
 }
 
@@ -37,7 +38,8 @@ function parseEnvFile(lines: string[], danger: boolean): Parsed {
   if (secret && !danger) return { ok: false, refusal: `${secret[1]} holds a private key. ${PRIVATE_KEY_REFUSAL}` }
   const grant = vars.find(([, name, value]) => name.endsWith('_GRANT') || value.startsWith('fgr1_'))
   const first = grant ?? secret
-  if (!first) return { ok: false, refusal: 'Dotenv lines, but none holds a Grant (a *_GRANT variable or an fgr1_ value).' }
+  if (!first)
+    return { ok: false, refusal: 'Dotenv lines, but none holds a Grant (a *_GRANT variable or an fgr1_ value).' }
   const parsed = parseText(first[0], { danger })
   if (!parsed.ok || !secret || parsed.keyOnly) return parsed
   const key = parseText(secret[0], { danger })
@@ -70,19 +72,23 @@ function parseShareLink(fragment: string, danger: boolean): Parsed {
   for (const param of params) {
     const at = param.indexOf('=')
     const name = at < 0 ? param : param.slice(0, at)
-    if (!['d', 'k'].includes(name) || values.has(name)) return { ok: false, refusal: `A v1 share link with an unexpected part: ${JSON.stringify(name)}.` }
+    if (!['d', 'k'].includes(name) || values.has(name))
+      return { ok: false, refusal: `A v1 share link with an unexpected part: ${JSON.stringify(name)}.` }
     values.set(name, param.slice(at + 1))
   }
   const grant = values.get('d')
   const access = values.get('k')
-  if (!rootCid || !grant) return { ok: false, refusal: 'A v1 share link, but not of the form v1/<root cid>&d=<grant>[&k=<Access key>].' }
+  if (!rootCid || !grant)
+    return { ok: false, refusal: 'A v1 share link, but not of the form v1/<root cid>&d=<grant>[&k=<Access key>].' }
   let bytes: Uint8Array
   try {
     bytes = decodeBase64(grant)
   } catch {
     return { ok: false, refusal: 'A v1 share link whose d= part is not base64url.' }
   }
-  const notes = [`Share link v1 for the upload with root CID ${rootCid}. It carries a grant wrapped to the link's Access key.`]
+  const notes = [
+    `Share link v1 for the upload with root CID ${rootCid}. It carries a grant wrapped to the link's Access key.`,
+  ]
   let key: Hex | undefined
   if (access != null) {
     const open = parseText(access, { danger })
@@ -94,7 +100,9 @@ function parseShareLink(fragment: string, danger: boolean): Parsed {
       }`
     )
   } else {
-    notes.push(`A restricted link: its Access key is sent separately.${danger ? ' Paste it into the key box to open it.' : ''}`)
+    notes.push(
+      `A restricted link: its Access key is sent separately.${danger ? ' Paste it into the key box to open it.' : ''}`
+    )
   }
   return { ok: true, bytes, source: 'share link grant', notes, key }
 }
@@ -105,7 +113,10 @@ export function parseText(raw: string, { danger = false }: Options = {}): Parsed
   let source = 'pasted bytes'
 
   // A whole session.env, several dotenv lines.
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
   if (lines.length > 1 && lines.every((line) => DOTENV.test(line))) return parseEnvFile(lines, danger)
 
   // A single dotenv line, as `session.env` holds it.
@@ -128,7 +139,12 @@ export function parseText(raw: string, { danger = false }: Options = {}): Parsed
     } catch {
       return { ok: false, refusal: 'An Access key (fak1_…), but not base64url.' }
     }
-    return keyResult(bytes, 'Access key (fak1_)', 'This is an Access key (fak1_…): the private key that opens a share link.', danger)
+    return keyResult(
+      bytes,
+      'Access key (fak1_)',
+      'This is an Access key (fak1_…): the private key that opens a share link.',
+      danger
+    )
   }
   const link = /(?:^|#)(v\d+\/.*)$/s.exec(text)
   if (link) return parseShareLink(link[1] as string, danger)
@@ -146,11 +162,19 @@ export function parseText(raw: string, { danger = false }: Options = {}): Parsed
   try {
     bytes = bytesFromText(text)
   } catch {
-    return { ok: false, refusal: 'Not hex, base64 or base64url, nor a Grant, share link or FOC-Grant header this inspector knows.' }
+    return {
+      ok: false,
+      refusal: 'Not hex, base64 or base64url, nor a Grant, share link or FOC-Grant header this inspector knows.',
+    }
   }
   // 32 bare bytes are a key, not a structure: secp256k1 private keys and Keysmith node keys alike.
   if (secretVar || bytes.length === 32) {
-    return keyResult(bytes, secretVar ?? 'pasted bytes', secretVar ? `${secretVar} holds a private key.` : 'These are 32 bare bytes.', danger)
+    return keyResult(
+      bytes,
+      secretVar ?? 'pasted bytes',
+      secretVar ? `${secretVar} holds a private key.` : 'These are 32 bare bytes.',
+      danger
+    )
   }
   return { ok: true, bytes, source, notes }
 }

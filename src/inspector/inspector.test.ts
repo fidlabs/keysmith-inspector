@@ -1,15 +1,29 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { decodeDelivery, encodeDelivery, grantDescriptor, newSalt, openDelivery, pieceKey, pieceMetadata, publicKeyOf, rootClaim, unwrapWith, wrapTo } from '@filoz/keysmith'
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
+import {
+  decodeDelivery,
+  encodeDelivery,
+  grantDescriptor,
+  newSalt,
+  openDelivery,
+  pieceKey,
+  pieceMetadata,
+  publicKeyOf,
+  rootClaim,
+  unwrapWith,
+  wrapTo,
+} from '@filoz/keysmith'
 import * as fee from 'filecoin-encryption-envelope'
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import SAMPLES from '../samples.json' with { type: 'json' }
 import { envelopeInCar, inspectBytes } from './describe.ts'
 import { parseText } from './input.ts'
 
 // filecoin-pin#788's golden Grant (Anvil keys), and the FOC-Grant header of Example 1 in keysmith's claim vectors.
-const GRANT = 'fgr1_gwGBqwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUALKCM9-AiLIQyrcFZIyt-sEVDxEzd22qQD6K1hd0pngPRL6QpO8BQAGGgAEyy8HUGoMg9KNYHqOiNxnkftJ1-IIWEGdCbSL16RMCZ2Hjsznju8VSTRpq-2RHLu7I-Bporb53VomKJ-goC0IRqON69e6bUOcH7QUKmWcKFlpQI2nT5JjGwpQagyD0o1geo6I3GeR-0nX4gsa9IZXAFi6pwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUALKCM9-AiLIQyrcFZIyt-sEWEEEQ9-xkEnBkX7FqCJHDgkGNVOlDBknDtAvJ__SuOQjpQlgLGfm1EvV4j3YxrjJg33xI92pA85BM-J4cgycL0Yl1QVMYIy-eUdXcvuV3NhHBlgwikJobsjiFOwzSVnbA7-WyI7_-0AIn8UgnzuANx3YCl_SQDZrM8iUMIDuNL620d39'
-const HEADER = 'Authorization: FOC-Grant gwGCqwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUAARIjNEVWZ3iJmqu8zd7v8EVHCZeXDFGBLcOgEMfQG1Dg0X3HnIBQEGGgAEyy8HUGmCgHZJZQ4xHkxpr0rJBBcIWEEFITskOn04xokCHpz4cyHOnMcc0CGKBqpT3ryp8WjPaWFOYYj1dHrWTqatbUuFDLALuFTlGuuSFIdywgWZq9GRHApQaYKAdkllDjEeTGmvSskEFwsaat1GgKYAAQFyc2NvcGU6YWdlbnQtbWVtb3J5BFQ8RM3dtqkA-itYXdKZ4D0S-kKTvAUAB1DAdHzv1YTi_8bp-684aTPGCFhBmqxvu_MYJOcy9lYmAS_W2c0gKhrtvc3to2HW5G4RkDBTKSvc_Nq4ZY2qy5m53iwuNoUeHsJ2v2RarYolbQeXLRujAFgnAVWRICIzBFy7lWgxqOJH7Qb38pP63xobZGvshUKsakzSKSkTY2knARpq1Bs8AlhBdfsRhhdC-lZ0Rf9egiAE_MxWM9eOK9f939d8-BT-Qv54nZFERMIDIP_LVuiH27gHks40GlEw5xXYlBgLaLqBnhw'
+const GRANT =
+  'fgr1_gwGBqwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUALKCM9-AiLIQyrcFZIyt-sEVDxEzd22qQD6K1hd0pngPRL6QpO8BQAGGgAEyy8HUGoMg9KNYHqOiNxnkftJ1-IIWEGdCbSL16RMCZ2Hjsznju8VSTRpq-2RHLu7I-Bporb53VomKJ-goC0IRqON69e6bUOcH7QUKmWcKFlpQI2nT5JjGwpQagyD0o1geo6I3GeR-0nX4gsa9IZXAFi6pwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUALKCM9-AiLIQyrcFZIyt-sEWEEEQ9-xkEnBkX7FqCJHDgkGNVOlDBknDtAvJ__SuOQjpQlgLGfm1EvV4j3YxrjJg33xI92pA85BM-J4cgycL0Yl1QVMYIy-eUdXcvuV3NhHBlgwikJobsjiFOwzSVnbA7-WyI7_-0AIn8UgnzuANx3YCl_SQDZrM8iUMIDuNL620d39'
+const HEADER =
+  'Authorization: FOC-Grant gwGCqwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUAARIjNEVWZ3iJmqu8zd7v8EVHCZeXDFGBLcOgEMfQG1Dg0X3HnIBQEGGgAEyy8HUGmCgHZJZQ4xHkxpr0rJBBcIWEEFITskOn04xokCHpz4cyHOnMcc0CGKBqpT3ryp8WjPaWFOYYj1dHrWTqatbUuFDLALuFTlGuuSFIdywgWZq9GRHApQaYKAdkllDjEeTGmvSskEFwsaat1GgKYAAQFyc2NvcGU6YWdlbnQtbWVtb3J5BFQ8RM3dtqkA-itYXdKZ4D0S-kKTvAUAB1DAdHzv1YTi_8bp-684aTPGCFhBmqxvu_MYJOcy9lYmAS_W2c0gKhrtvc3to2HW5G4RkDBTKSvc_Nq4ZY2qy5m53iwuNoUeHsJ2v2RarYolbQeXLRujAFgnAVWRICIzBFy7lWgxqOJH7Qb38pP63xobZGvshUKsakzSKSkTY2knARpq1Bs8AlhBdfsRhhdC-lZ0Rf9egiAE_MxWM9eOK9f939d8-BT-Qv54nZFERMIDIP_LVuiH27gHks40GlEw5xXYlBgLaLqBnhw'
 
 function parsed(text: string) {
   const result = parseText(text)
@@ -76,7 +90,10 @@ test('danger mode decodes keys, and opens a restricted share link with its Acces
     maxDepth: 0,
     expires: 4102444800,
   })
-  const delivery = encodeDelivery(chain, await wrapTo(publicKeyOf(accessKey), nodeKey, grantDescriptor(ref, 'keyspace')))
+  const delivery = encodeDelivery(
+    chain,
+    await wrapTo(publicKeyOf(accessKey), nodeKey, grantDescriptor(ref, 'keyspace'))
+  )
   const b64 = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64url')
   const link = `#v1/bafyroot&d=${b64(delivery)}&k=fak1_${b64(Buffer.from(accessKey.slice(2), 'hex'))}`
 
@@ -97,9 +114,13 @@ test('a FEE piece shows its Keysmith labels', async () => {
     { salt: newSalt(), scope: 'team' }
   )
   const plaintext = new TextEncoder().encode('hello')
-  const stream = new Blob([plaintext])
-    .stream()
-    .pipeThrough(fee.encrypt({ cek: pieceKey(new Uint8Array(32).fill(7), metadata['foc/salt']), appMetadata: metadata, contentLength: plaintext.length }))
+  const stream = new Blob([plaintext]).stream().pipeThrough(
+    fee.encrypt({
+      cek: pieceKey(new Uint8Array(32).fill(7), metadata['foc/salt']),
+      appMetadata: metadata,
+      contentLength: plaintext.length,
+    })
+  )
   const bytes = new Uint8Array(await new Response(stream).arrayBuffer())
   const view = inspectBytes(bytes)
   assert.equal(view.kind, 'piece')
@@ -108,7 +129,16 @@ test('a FEE piece shows its Keysmith labels', async () => {
 
 test('a CAR file is explained rather than misread', () => {
   // varint 0x11, then the CBOR map {"roots": [], "version": 1}
-  const car = new Uint8Array([0x11, 0xa2, 0x65, ...new TextEncoder().encode('roots'), 0x80, 0x67, ...new TextEncoder().encode('version'), 0x01])
+  const car = new Uint8Array([
+    0x11,
+    0xa2,
+    0x65,
+    ...new TextEncoder().encode('roots'),
+    0x80,
+    0x67,
+    ...new TextEncoder().encode('version'),
+    0x01,
+  ])
   const view = inspectBytes(car)
   assert.equal(view.kind, 'unknown')
   assert.match(view.kind === 'unknown' ? view.reason : '', /CAR file/)
@@ -130,7 +160,11 @@ test('every sample inspects, and its keys open it', async () => {
   assert.deepEqual(await unwrapWith(open.key, open.bytes), await unwrapWith(access.key, restricted.bytes))
 
   // The Grants: one link for keyspace and for scope:team, two for the nested chain.
-  for (const [i, node, links] of [[3, 'keyspace', 1], [4, 'scope:team', 1], [5, 'scope:team/alice', 2]] as const) {
+  for (const [i, node, links] of [
+    [3, 'keyspace', 1],
+    [4, 'scope:team', 1],
+    [5, 'scope:team/alice', 2],
+  ] as const) {
     const grant = parsed(SAMPLES[i]!.items[0]!.text)
     const key = parseText(SAMPLES[i]!.items[1]!.text, { danger: true })
     assert.ok(key.ok && key.key)
