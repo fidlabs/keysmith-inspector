@@ -42,9 +42,7 @@ const envelope = await readFile(join(dir, ENCRYPTED_FILE_NAME))
 await rm(dir, { recursive: true })
 await rm(carPath, { force: true })
 const inner = new Uint8Array(
-  await new Response(
-    new Blob([envelope]).stream().pipeThrough(fee.decrypt(ks.keyResolver(kk)))
-  ).arrayBuffer()
+  await new Response(new Blob([envelope]).stream().pipeThrough(fee.decrypt(ks.keyResolver(kk)))).arrayBuffer()
 )
 assert.equal(inner[1], 0xa2, 'the decrypted upload is the inner CAR') // a CARv1 header: varint, then a 2-entry map
 
@@ -64,12 +62,23 @@ for (const [link, access] of [
 // 4, 5, 6. Grants (fgr1_ deliveries), as the console signs them for a session key.
 async function grant(chainAndKey, node, bearer) {
   const { chain, nodeKey } = await chainAndKey
-  const delivery = ks.encodeDelivery(chain, await ks.wrapTo(ks.publicKeyOf(bearer.privateKey), nodeKey, ks.grantDescriptor(ref, node)))
+  const delivery = ks.encodeDelivery(
+    chain,
+    await ks.wrapTo(ks.publicKeyOf(bearer.privateKey), nodeKey, ks.grantDescriptor(ref, node))
+  )
   assert.deepEqual((await ks.openDelivery(bearer.privateKey, delivery)).key, nodeKey)
   return `fgr1_${b64(delivery)}`
 }
 const root = (node, bearer, maxDepth) =>
-  ks.rootClaim(owner, { ...ref, chainId: CHAIN_ID, kk, node, bearer: bearer.account.address, maxDepth, expires: EXPIRES })
+  ks.rootClaim(owner, {
+    ...ref,
+    chainId: CHAIN_ID,
+    kk,
+    node,
+    bearer: bearer.account.address,
+    maxDepth,
+    expires: EXPIRES,
+  })
 
 const session = key()
 const team = key()
@@ -92,12 +101,14 @@ const samples = [
   },
   {
     title: 'A self-contained Share link',
-    about: 'An open link: it carries its own Access key (k=), so the link alone opens the upload. Turn on Danger mode to open it here.',
+    about:
+      'An open link: it carries its own Access key (k=), so the link alone opens the upload. Turn on Danger mode to open it here.',
     items: [{ label: 'Share link', text: open.link }],
   },
   {
     title: 'A Share link with a detached Access key',
-    about: 'A restricted link: the Access key is sent separately. Turn on Danger mode and paste the key into the key box to open it.',
+    about:
+      'A restricted link: the Access key is sent separately. Turn on Danger mode and paste the key into the key box to open it.',
     items: [
       { label: 'Share link', text: restricted.link },
       { label: 'Access key', text: restricted.accessKey },
@@ -105,7 +116,8 @@ const samples = [
   },
   {
     title: 'A Grant for the whole keyspace (kk)',
-    about: 'One link from the owner, as the console grants a session key at login: node "keyspace", no further delegation.',
+    about:
+      'One link from the owner, as the console grants a session key at login: node "keyspace", no further delegation.',
     items: [
       { label: 'Grant', text: await grant(root('keyspace', session, 0), 'keyspace', session) },
       { label: 'Session key (Danger mode, key box)', text: `SESSION_KEY=${session.privateKey}` },
@@ -113,7 +125,8 @@ const samples = [
   },
   {
     title: 'A Grant for a scope',
-    about: 'One link from the owner for scope "team" only: it opens uploads in team and below, not the rest of the keyspace.',
+    about:
+      'One link from the owner for scope "team" only: it opens uploads in team and below, not the rest of the keyspace.',
     items: [
       { label: 'Grant', text: await grant(root('scope:team', team, 0), 'scope:team', team) },
       { label: 'Session key (Danger mode, key box)', text: `SESSION_KEY=${team.privateKey}` },
@@ -121,7 +134,8 @@ const samples = [
   },
   {
     title: 'A nested claim chain',
-    about: 'Two links: the owner grants a session key the keyspace with one level of delegation, and the session key narrows it to scope "team/alice" for an agent.',
+    about:
+      'Two links: the owner grants a session key the keyspace with one level of delegation, and the session key narrows it to scope "team/alice" for an agent.',
     items: [
       { label: 'Grant', text: await grant(nested, 'scope:team/alice', agent) },
       { label: "Agent's key (Danger mode, key box)", text: `SESSION_KEY=${agent.privateKey}` },
@@ -130,4 +144,6 @@ const samples = [
 ]
 
 await writeFile(new URL('../src/samples.json', import.meta.url), `${JSON.stringify(samples, null, 2)}\n`)
-console.log(`wrote ${samples.length} samples; upload CAR ${car.length} B, envelope ${envelope.length} B, root ${rootCid}`)
+console.log(
+  `wrote ${samples.length} samples; upload CAR ${car.length} B, envelope ${envelope.length} B, root ${rootCid}`
+)

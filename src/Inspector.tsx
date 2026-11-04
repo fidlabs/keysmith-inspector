@@ -100,7 +100,13 @@ function KeyPanel({ privateKey, grant }: { privateKey: Hex; grant?: { bytes: Uin
 
 export function Inspector() {
   const [danger, setDanger] = useState(false)
-  const [input, setInput] = useState<{ bytes: Uint8Array; source: string; notes: string[]; key?: Hex; keyOnly?: boolean } | null>(null)
+  const [input, setInput] = useState<{
+    bytes: Uint8Array
+    source: string
+    notes: string[]
+    key?: Hex
+    keyOnly?: boolean
+  } | null>(null)
   const [pasted, setPasted] = useState('')
   const [keyText, setKeyText] = useState('') // danger mode: the key to open a delivery with, sent apart from it
   const [error, setError] = useState<string | null>(null)
@@ -132,15 +138,23 @@ export function Inspector() {
     const key = danger && keyBox.trim() ? parseText(keyBox, { danger }) : null
     if (!parsed.ok || (key && !(key.ok && key.keyOnly))) {
       setInput(null)
-      setError(!parsed.ok ? parsed.refusal : key && !key.ok ? `Key box: ${key.refusal}` : 'Key box: that is not a private key.')
+      if (!parsed.ok) setError(parsed.refusal)
+      else setError(key && !key.ok ? `Key box: ${key.refusal}` : 'Key box: that is not a private key.')
     } else if (key?.ok) {
-      load(parsed.bytes, parsed.source, [...parsed.notes, 'Opening it with the key from the key box.'], key.key, parsed.keyOnly)
+      load(
+        parsed.bytes,
+        parsed.source,
+        [...parsed.notes, 'Opening it with the key from the key box.'],
+        key.key,
+        parsed.keyOnly
+      )
     } else load(parsed.bytes, parsed.source, parsed.notes, parsed.key, parsed.keyOnly)
   }
 
   const owners = useMemo(() => {
     const byte: number[] = []
-    for (const [i, f] of (view?.fields ?? []).entries()) for (let b = f.start; b < Math.min(f.end, SHOWN); b++) byte[b] = i
+    for (const [i, f] of (view?.fields ?? []).entries())
+      for (let b = f.start; b < Math.min(f.end, SHOWN); b++) byte[b] = i
     return byte
   }, [view])
   const activeField = active != null ? view?.fields[active] : undefined
@@ -154,15 +168,17 @@ export function Inspector() {
     setActive(field)
   }
   useEffect(() => {
-    if (active == null || !activeField) return
+    const fields = fieldsPane.current
+    const hex = hexPane.current
+    if (active == null || !activeField || !fields || !hex) return
     if (hoverIn === 'hex') {
-      const item = fieldsPane.current?.children[active]
-      if (item) reveal(fieldsPane.current!, item, item)
-    } else if (hexPane.current && activeField.start < SHOWN) {
-      const byte = (at: number) => hexPane.current!.querySelector(`[data-at="${at}"]`)
+      const item = fields.children[active]
+      if (item) reveal(fields, item, item)
+    } else if (activeField.start < SHOWN) {
+      const byte = (at: number) => hex.querySelector(`[data-at="${at}"]`)
       const first = byte(activeField.start)
       const last = byte(Math.min(activeField.end, SHOWN, input?.bytes.length ?? 0) - 1) ?? first
-      if (first && last) reveal(hexPane.current, first, last)
+      if (first && last) reveal(hex, first, last)
     }
   }, [active, activeField, hoverIn, input])
 
@@ -173,6 +189,7 @@ export function Inspector() {
           <input
             type="checkbox"
             role="switch"
+            aria-checked={danger}
             checked={danger}
             onChange={(event) => {
               setDanger(event.target.checked)
@@ -188,7 +205,10 @@ export function Inspector() {
           </span>
         </label>
         {danger ? (
-          <p className="small">Use only throwaway or test keys: treat any real key you paste here as exposed. Turning this off clears every key from the page.</p>
+          <p className="small">
+            Use only throwaway or test keys: treat any real key you paste here as exposed. Turning this off clears every
+            key from the page.
+          </p>
         ) : null}
       </div>
       <div className="inputs">
@@ -215,7 +235,8 @@ export function Inspector() {
         </div>
         <div className="input-col">
           <label htmlFor="paste" className="caption">
-            Or paste: a Grant (fgr1_…), a share link, an Authorization: FOC-Grant header, a KEYSPACE_GRANT= line, or hex / base64 / base64url bytes
+            Or paste: a Grant (fgr1_…), a share link, an Authorization: FOC-Grant header, a KEYSPACE_GRANT= line, or hex
+            / base64 / base64url bytes
           </label>
           <textarea
             id="paste"
@@ -228,7 +249,10 @@ export function Inspector() {
           <div className="stack controls">
             {danger ? (
               <label className="field">
-                <span>Key to open it with, if it was sent separately: an Access key (fak1_…), a SESSION_KEY= line or a hex private key</span>
+                <span>
+                  Key to open it with, if it was sent separately: an Access key (fak1_…), a SESSION_KEY= line or a hex
+                  private key
+                </span>
                 <input
                   type="text"
                   className="mono"
@@ -241,7 +265,12 @@ export function Inspector() {
               </label>
             ) : null}
             <div className="row">
-              <button type="button" className="button primary" disabled={!pasted.trim()} onClick={() => inspect(pasted, keyText)}>
+              <button
+                type="button"
+                className="button primary"
+                disabled={!pasted.trim()}
+                onClick={() => inspect(pasted, keyText)}
+              >
                 Inspect
               </button>
             </div>
@@ -251,7 +280,10 @@ export function Inspector() {
       {error ? <p className="notice notice-error">{error}</p> : null}
 
       {input?.key ? (
-        <KeyPanel privateKey={input.key} grant={!input.keyOnly && view?.kind === 'grant' ? { bytes: input.bytes, chained: !!view.chain } : undefined} />
+        <KeyPanel
+          privateKey={input.key}
+          grant={!input.keyOnly && view?.kind === 'grant' ? { bytes: input.bytes, chained: !!view.chain } : undefined}
+        />
       ) : null}
 
       {input && view && !input.keyOnly ? (
@@ -287,8 +319,10 @@ export function Inspector() {
             <p className="notice notice-ok">Keysmith's strict decoder accepts it. Signatures are not checked here.</p>
           ) : null}
           <div className="bytes-view">
+            {/* biome-ignore lint/a11y/noStaticElementInteractions: hover only cross-highlights; the field list gives every byte range as text */}
             <div className="hex" ref={hexPane} onMouseLeave={() => setActive(null)}>
               {Array.from({ length: Math.ceil(Math.min(input.bytes.length, SHOWN) / 16) }, (_, row) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: a row is its position: bytes row*16 onwards
                 <div key={row} className="hex-row">
                   <span className="offset">{(row * 16).toString(16).padStart(4, '0')}</span>
                   {Array.from(input.bytes.subarray(row * 16, Math.min(row * 16 + 16, SHOWN)), (byte, i) => {
@@ -297,6 +331,7 @@ export function Inspector() {
                     const group = owner != null ? view.fields[owner]?.group : 'none'
                     const lit = activeField && at >= activeField.start && at < activeField.end
                     return (
+                      // biome-ignore lint/a11y/noStaticElementInteractions: hover only cross-highlights; the field list gives every byte range as text
                       <span
                         key={at}
                         data-at={at}
@@ -309,7 +344,9 @@ export function Inspector() {
                   })}
                 </div>
               ))}
-              {input.bytes.length > SHOWN ? <div className="muted small">… {input.bytes.length - SHOWN} more bytes</div> : null}
+              {input.bytes.length > SHOWN ? (
+                <div className="muted small">… {input.bytes.length - SHOWN} more bytes</div>
+              ) : null}
             </div>
             <ol className="fields" ref={fieldsPane} onMouseLeave={() => setActive(null)}>
               {view.fields.map((f, i) => (
