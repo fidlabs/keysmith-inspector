@@ -48,6 +48,33 @@ test('a FOC-Grant header is a presentation with its request', () => {
   assert.ok(view.kind === 'presentation' && !view.strictError && view.request && view.chain?.links.length === 2)
 })
 
+test('a grant reaches Curio the ways its gate reads one, and other credentials stay hidden', () => {
+  const token = HEADER.slice('Authorization: FOC-Grant '.length)
+  for (const [text, source] of [
+    [`Authorization: ${token}`, 'Authorization header'],
+    [`Authorization: Basic ${btoa(`FOC Grant:${token}`)}`, 'Authorization: Basic, user "FOC Grant"'],
+    [`Basic ${btoa(`FOC%20Grant:FOC-Grant ${token}`)}`, 'Authorization: Basic, user "FOC%20Grant"'],
+    [`Cookie: session=hunter2; FOC Grant=${token}`, 'FOC Grant cookie'],
+    [`FOC%20Grant=${token}`, 'FOC Grant cookie'],
+  ] as const) {
+    const result = parsed(text)
+    assert.equal(result.source, source)
+    assert.deepEqual(result.notes, [])
+    assert.equal(inspectBytes(result.bytes).kind, 'presentation')
+  }
+
+  assert.match(parsed(`Authorization: foc-grant ${token}`).notes[0]!, /refuses this spelling/)
+  assert.match(parsed(`FOC-Grant ${token.replace(/-/g, '+').replace(/_/g, '/')}`).notes[0]!, /base64url only/)
+  for (const text of [
+    `Authorization: Basic ${btoa('alice:hunter2')}`,
+    'Cookie: session=hunter2',
+    'Authorization: Bearer hunter2',
+  ]) {
+    const result = parseText(text)
+    assert.ok(!result.ok && !result.refusal.includes('hunter2'), text)
+  }
+})
+
 test('a share link, as filecoin-pin writes it, shows its grant and never decodes an Access key unless asked', () => {
   const open = SAMPLES[1]!.items[0]!.text
   const restricted = SAMPLES[2]!.items[0]!.text
