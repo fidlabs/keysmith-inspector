@@ -11,6 +11,7 @@ import {
   publicKeyOf,
   rootClaim,
   unwrapWith,
+  verifyPresentation,
   wrapTo,
 } from '@filoz/keysmith'
 import * as fee from 'filecoin-encryption-envelope'
@@ -199,6 +200,20 @@ test('every sample inspects, and its keys open it', async () => {
     assert.equal(claim.node, node)
     assert.equal(decodeDelivery(grant.bytes).chain.links.length, links)
   }
+
+  // The header: the keyspace Grant's chain, and its session key's request for the upload, which the gate serves.
+  const header = parsed(SAMPLES[6]!.items[0]!.text)
+  const view = inspectBytes(header.bytes)
+  assert.ok(view.kind === 'presentation' && !view.strictError && view.request)
+  const session = parseText(SAMPLES[3]!.items[1]!.text, { danger: true })
+  assert.ok(session.ok && session.key)
+  const claim = await verifyPresentation(header.bytes, {
+    pieceCid: view.request.pieceCid,
+    piece: piece.metadata,
+    chainId: 314159n,
+    now: view.request.expires - 1,
+  })
+  assert.equal(claim.bearer, privateKeyToAccount(session.key).address)
 })
 
 test('a claim chain or request with a nonsense expiry still inspects', () => {

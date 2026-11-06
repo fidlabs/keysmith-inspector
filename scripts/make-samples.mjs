@@ -15,6 +15,7 @@ const { encryptPath, ENCRYPTED_FILE_NAME } = await import(join(fp, 'dist/common/
 const { createCarFromPath } = await import(join(fp, 'dist/core/unixfs/index.js'))
 const { defaultGroupKeyId, newPieceKey } = await import(join(fp, 'dist/common/group-key.js'))
 const { createShare } = await import(join(fp, 'dist/common/share-link.js'))
+const { calculate } = await import(join(fp, 'node_modules/@filoz/synapse-core/dist/src/piece/index.js'))
 
 const VIEWER = 'https://viewer.invalid/' // the fragment is what matters; no viewer holds this sample upload
 const CHAIN_ID = 314159n // calibration
@@ -84,7 +85,17 @@ const session = key()
 const team = key()
 const delegator = key()
 const agent = key()
+const sessionGrant = root('keyspace', session, 0)
 const sessionRoot = await root('keyspace', delegator, 1)
+
+// 7. The Authorization header for one gated fetch of the upload's piece (the outer CAR), signed by the session key.
+// As keysmith's authorizationHeader() builds it; use that once a release has it.
+const pieceCid = (await calculate(car)).bytes
+const now = Math.floor(Date.now() / 1000)
+const request = await ks.signRequest(session.account, (await sessionGrant).chain, { pieceCid, expires: now + 240 })
+const presentation = ks.encodePresentation((await sessionGrant).chain, request)
+const served = await ks.verifyPresentation(presentation, { pieceCid, piece: labels, chainId: CHAIN_ID, now })
+assert.equal(served.bearer, session.account.address)
 const nested = ks.delegateClaim(delegator.account, sessionRoot.chain, {
   parentKey: sessionRoot.nodeKey,
   node: 'scope:team/alice',
@@ -119,7 +130,7 @@ const samples = [
     about:
       'One link from the owner, as the console grants a session key at login: node "keyspace", no further delegation.',
     items: [
-      { label: 'Grant', text: await grant(root('keyspace', session, 0), 'keyspace', session) },
+      { label: 'Grant', text: await grant(sessionGrant, 'keyspace', session) },
       { label: 'Session key (Danger mode, key box)', text: `SESSION_KEY=${session.privateKey}` },
     ],
   },
@@ -140,6 +151,12 @@ const samples = [
       { label: 'Grant', text: await grant(nested, 'scope:team/alice', agent) },
       { label: "Agent's key (Danger mode, key box)", text: `SESSION_KEY=${agent.privateKey}` },
     ],
+  },
+  {
+    title: 'An Authorization header for a gated fetch',
+    about:
+      "What a client sends Curio to fetch the upload above: the keyspace Grant's claim chain, and a request signed by its session key naming the upload's piece. A real header is good for 4 minutes; this one has long expired.",
+    items: [{ label: 'Authorization header', text: `Authorization: FOC-Grant ${b64(presentation)}` }],
   },
 ]
 
