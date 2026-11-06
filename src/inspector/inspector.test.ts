@@ -214,6 +214,21 @@ test('every sample inspects, and its keys open it', async () => {
     now: view.request.expires - 1,
   })
   assert.equal(claim.bearer, privateKeyToAccount(session.key).address)
+
+  // The nested header: the nested Grant's chain (keyspace, then team/alice), and the agent's request.
+  const nested = inspectBytes(parsed(SAMPLES[7]!.items[0]!.text).bytes)
+  assert.ok(nested.kind === 'presentation' && !nested.strictError && nested.chain)
+  assert.deepEqual(
+    nested.chain.links.map((link) => [link.node, link.maxDepth]),
+    [
+      ['keyspace', 1],
+      ['scope:team/alice', 0],
+    ]
+  )
+  const agent = parseText(SAMPLES[5]!.items[1]!.text, { danger: true })
+  assert.ok(agent.ok && agent.key)
+  assert.equal(nested.chain.links[1]!.bearer, privateKeyToAccount(agent.key).address)
+  assert.deepEqual(nested.chain, decodeDelivery(parsed(SAMPLES[5]!.items[0]!.text).bytes).chain)
 })
 
 test('a claim chain or request with a nonsense expiry still inspects', () => {
