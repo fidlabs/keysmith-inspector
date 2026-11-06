@@ -9,7 +9,10 @@ It accepts:
 - a Grant as filecoin-pin prints it (`fgr1_…`), or a `GROUP_KEY_GRANT=` / `KEYSPACE_GRANT=` line from `session.env`
 - a share link as filecoin-pin writes it (`…#v1/<root cid>&d=<grant>[&k=<Access key>]`): the grant is shown, and an
   Access key in the link is never decoded
-- an `Authorization: FOC-Grant …` header: the claim chain and the request a gating provider checks
+- a grant presentation the ways Curio's gate reads one: an `Authorization: FOC-Grant …` header, a bare
+  `Authorization: <base64url>`, Basic auth as user `FOC Grant` (or `FOC%20Grant`), or a `FOC Grant` cookie. It shows
+  the claim chain and the request a gating provider checks, and notes what Curio would refuse (another scheme
+  spelling, standard base64). Another user's Basic password and other cookies are never decoded or shown
 - a FEE envelope file (`encrypted.fee`), or the CAR an encrypted upload is stored as (the envelope inside it is shown),
   or raw bytes as hex, base64 or base64url
 

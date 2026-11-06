@@ -107,6 +107,75 @@ function parseShareLink(fragment: string, danger: boolean): Parsed {
   return { ok: true, bytes, source: 'share link grant', notes, key }
 }
 
+/** The Basic-auth user and cookie name Curio reads a grant from, plain and URL-escaped. */
+const GRANT_NAMES = new Set(['FOC Grant', 'FOC%20Grant'])
+const GRANT_COOKIE = /(?:^|;)\s*FOC(?: |%20)Grant=/
+
+type Token = { token: string; source: string; notes: string[] } | { refusal: string }
+
+/**
+ * A grant token as Curio's gate takes it from a request (curio lib/keysmith, `Credential`): `Authorization: FOC-Grant
+ * <token>`, a bare `Authorization: <token>`, Basic auth as user `FOC Grant`, or a `FOC Grant` cookie. Null for none of
+ * these. Other credentials in the paste (another user's password, other cookies) are never decoded or shown.
+ */
+function curioToken(text: string): Token | null {
+  const notes: string[] = []
+  const auth = /^Authorization:\s*(.*)$/is.exec(text)
+  let value = auth ? (auth[1] as string).trim() : text
+  let source: string | undefined
+  const basic = /^Basic\s+(\S+)$/i.exec(value)
+  const cookie = auth ? null : /^Cookie:\s*(.*)$/is.exec(text)
+  if (basic) {
+    let pair: string
+    try {
+      pair = atob(basic[1] as string)
+    } catch {
+      return { refusal: 'Basic auth whose credentials are not base64.' }
+    }
+    const colon = pair.indexOf(':')
+    const user = colon < 0 ? pair : pair.slice(0, colon)
+    if (!GRANT_NAMES.has(user)) {
+      return {
+        refusal:
+          'Basic auth for another user: Curio reads a grant only from user "FOC Grant" (or "FOC%20Grant"). Its password was not decoded or shown.',
+      }
+    }
+    value = pair.slice(colon + 1).trim()
+    if (colon < 0 || !value)
+      return { refusal: `Basic auth as user ${JSON.stringify(user)}, but with no password: no grant.` }
+    source = `Authorization: Basic, user ${JSON.stringify(user)}`
+  } else if (cookie || GRANT_COOKIE.test(text)) {
+    const grants = (cookie ? (cookie[1] as string) : text)
+      .split(';')
+      .map((part) => part.trim())
+      .filter((part) => GRANT_NAMES.has(part.slice(0, part.indexOf('='))) && part.indexOf('=') < part.length - 1)
+      .map((part) => part.slice(part.indexOf('=') + 1))
+    if (grants.length === 0) {
+      return {
+        refusal: 'A Cookie header with no "FOC Grant" cookie, the one Curio reads. Its other cookies were not shown.',
+      }
+    }
+    value = grants.reduce((best, grant) => (grant.length > best.length ? grant : best))
+    source = 'FOC Grant cookie'
+    if (grants.length > 1) notes.push(`${grants.length} FOC Grant cookies: Curio uses the longest, shown here.`)
+  }
+  const scheme = /^FOC-Grant\s+(\S+)$/i.exec(value)
+  if (scheme) {
+    if (!value.startsWith('FOC-Grant ')) {
+      notes.push('Curio matches the scheme exactly, "FOC-Grant" and a space: it refuses this spelling.')
+    }
+    value = scheme[1] as string
+    source ??= 'FOC-Grant header'
+  } else if (!auth && !source) return null
+  source ??= 'Authorization header'
+  if (!/^[A-Za-z0-9_-]*={0,2}$/.test(value)) {
+    if (/^[A-Za-z0-9+/]*={0,2}$/.test(value)) {
+      notes.push('Standard base64 (+ or /): Curio reads base64url only, and refuses this.')
+    } else return { refusal: `${source}, but its value is not a base64url grant: Curio refuses it.` }
+  }
+  return { token: value, source, notes }
+}
+
 export function parseText(raw: string, { danger = false }: Options = {}): Parsed {
   let text = raw.trim()
   const notes: string[] = []
@@ -149,10 +218,12 @@ export function parseText(raw: string, { danger = false }: Options = {}): Parsed
   const link = /(?:^|#)(v\d+\/.*)$/s.exec(text)
   if (link) return parseShareLink(link[1] as string, danger)
 
-  const header = /^(Authorization:\s*)?FOC-Grant\s+(\S+)$/i.exec(text)
-  if (header) {
-    text = header[2] as string
-    source = 'FOC-Grant header'
+  const curio = curioToken(text)
+  if (curio && 'refusal' in curio) return { ok: false, refusal: curio.refusal }
+  if (curio) {
+    text = curio.token
+    source = curio.source
+    notes.push(...curio.notes)
   } else if (text.startsWith('fgr1_')) {
     text = text.slice('fgr1_'.length)
     source = 'Grant (fgr1_)'
@@ -160,7 +231,8 @@ export function parseText(raw: string, { danger = false }: Options = {}): Parsed
 
   let bytes: Uint8Array
   try {
-    bytes = bytesFromText(text)
+    // A request token is base64url, as Curio decodes it, even when every character is also hex.
+    bytes = curio ? decodeBase64(text) : bytesFromText(text)
   } catch {
     return {
       ok: false,

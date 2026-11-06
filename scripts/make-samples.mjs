@@ -15,6 +15,7 @@ const { encryptPath, ENCRYPTED_FILE_NAME } = await import(join(fp, 'dist/common/
 const { createCarFromPath } = await import(join(fp, 'dist/core/unixfs/index.js'))
 const { defaultGroupKeyId, newPieceKey } = await import(join(fp, 'dist/common/group-key.js'))
 const { createShare } = await import(join(fp, 'dist/common/share-link.js'))
+const { calculate } = await import(join(fp, 'node_modules/@filoz/synapse-core/dist/src/piece/index.js'))
 
 const VIEWER = 'https://viewer.invalid/' // the fragment is what matters; no viewer holds this sample upload
 const CHAIN_ID = 314159n // calibration
@@ -31,16 +32,20 @@ const ref = { owner: owner.address, keyspace: defaultGroupKeyId(owner.address) }
 const { kk, descriptor } = await ks.keyspaceKeys(owner, ref)
 
 // 1. `add --encrypt`: inner UnixFS CAR → FEE → encrypted.fee → outer UnixFS CAR.
-const dir = await mkdtemp(join(tmpdir(), 'inspector-samples-'))
-const plaintext = join(dir, 'hello.txt')
-await writeFile(plaintext, 'Hello from the Keysmith Inspector samples.\n')
-const pieceKey = newPieceKey(ks.writeTarget(descriptor, kk))
-await encryptPath(plaintext, join(dir, ENCRYPTED_FILE_NAME), pieceKey)
-const { carPath, rootCid } = await createCarFromPath(join(dir, ENCRYPTED_FILE_NAME))
-const car = await readFile(carPath)
-const envelope = await readFile(join(dir, ENCRYPTED_FILE_NAME))
-await rm(dir, { recursive: true })
-await rm(carPath, { force: true })
+async function upload(target) {
+  const dir = await mkdtemp(join(tmpdir(), 'inspector-samples-'))
+  const plaintext = join(dir, 'hello.txt')
+  await writeFile(plaintext, 'Hello from the Keysmith Inspector samples.\n')
+  const pieceKey = newPieceKey(target)
+  await encryptPath(plaintext, join(dir, ENCRYPTED_FILE_NAME), pieceKey)
+  const { carPath, rootCid } = await createCarFromPath(join(dir, ENCRYPTED_FILE_NAME))
+  const car = await readFile(carPath)
+  const envelope = await readFile(join(dir, ENCRYPTED_FILE_NAME))
+  await rm(dir, { recursive: true })
+  await rm(carPath, { force: true })
+  return { pieceKey, rootCid, car, envelope }
+}
+const { pieceKey, rootCid, car, envelope } = await upload(ks.writeTarget(descriptor, kk))
 const inner = new Uint8Array(
   await new Response(new Blob([envelope]).stream().pipeThrough(fee.decrypt(ks.keyResolver(kk)))).arrayBuffer()
 )
@@ -84,7 +89,21 @@ const session = key()
 const team = key()
 const delegator = key()
 const agent = key()
+const sessionGrant = root('keyspace', session, 0)
 const sessionRoot = await root('keyspace', delegator, 1)
+
+// 7, 8. The Authorization header for one gated fetch of a piece (an outer CAR), signed by the chain's final bearer and
+// checked as the gate checks it. As keysmith's authorizationHeader() builds it; use that once a release has it.
+async function header(bearer, chain, piece) {
+  const pieceCid = (await calculate(piece.car)).bytes
+  const now = Math.floor(Date.now() / 1000)
+  const request = await ks.signRequest(bearer.account, chain, { pieceCid, expires: now + 240 })
+  const presentation = ks.encodePresentation(chain, request)
+  const labels = piece.pieceKey.appMetadata
+  const served = await ks.verifyPresentation(presentation, { pieceCid, piece: labels, chainId: CHAIN_ID, now })
+  assert.equal(served.bearer, bearer.account.address)
+  return `Authorization: FOC-Grant ${b64(presentation)}`
+}
 const nested = ks.delegateClaim(delegator.account, sessionRoot.chain, {
   parentKey: sessionRoot.nodeKey,
   node: 'scope:team/alice',
@@ -119,7 +138,7 @@ const samples = [
     about:
       'One link from the owner, as the console grants a session key at login: node "keyspace", no further delegation.',
     items: [
-      { label: 'Grant', text: await grant(root('keyspace', session, 0), 'keyspace', session) },
+      { label: 'Grant', text: await grant(sessionGrant, 'keyspace', session) },
       { label: 'Session key (Danger mode, key box)', text: `SESSION_KEY=${session.privateKey}` },
     ],
   },
@@ -139,6 +158,25 @@ const samples = [
     items: [
       { label: 'Grant', text: await grant(nested, 'scope:team/alice', agent) },
       { label: "Agent's key (Danger mode, key box)", text: `SESSION_KEY=${agent.privateKey}` },
+    ],
+  },
+  {
+    title: 'An Authorization header for a gated fetch',
+    about:
+      "What a client sends Curio to fetch the upload above: the keyspace Grant's claim chain, and a request signed by its session key naming the upload's piece. A real header is good for 4 minutes; this one has long expired.",
+    items: [
+      { label: 'Authorization header', text: await header(session, (await sessionGrant).chain, { pieceKey, car }) },
+    ],
+  },
+  {
+    title: 'An Authorization header from a nested claim chain',
+    about:
+      'The nested chain above, presented: the owner gives a session key the keyspace with one level of delegation, that key narrows it to scope "team/alice" for an agent, and the agent signs the request for a piece in team/alice. A real header is good for 4 minutes; this one has long expired.',
+    items: [
+      {
+        label: 'Authorization header',
+        text: await header(agent, (await nested).chain, await upload(ks.writeTarget(descriptor, kk, 'team/alice'))),
+      },
     ],
   },
 ]

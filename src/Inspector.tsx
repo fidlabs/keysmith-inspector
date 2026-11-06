@@ -237,8 +237,8 @@ export function Inspector() {
         </div>
         <div className="input-col">
           <label htmlFor="paste" className="caption">
-            Or paste: a Grant (fgr1_…), a share link, an Authorization: FOC-Grant header, a KEYSPACE_GRANT= line, or hex
-            / base64 / base64url bytes
+            Or paste: a Grant (fgr1_…), a share link, an Authorization header (FOC-Grant, or Basic as user "FOC Grant")
+            or FOC Grant cookie as Curio reads them, a KEYSPACE_GRANT= line, or hex / base64 / base64url bytes
           </label>
           <textarea
             id="paste"
@@ -318,7 +318,10 @@ export function Inspector() {
             <p className="notice notice-error">Keysmith refuses this: {view.strictError}</p>
           ) : null}
           {(view.kind === 'grant' || view.kind === 'presentation') && !view.strictError ? (
-            <p className="notice notice-ok">Keysmith's strict decoder accepts it. Signatures are not checked here.</p>
+            <p className="notice notice-ok">
+              Keysmith 0.1.0's strict decoder accepts it. Signatures are not checked here, and newer gates (Curio, later
+              Keysmith) also refuse non-canonical CBOR and high-s signatures.
+            </p>
           ) : null}
           <div className="bytes-view">
             {/* biome-ignore lint/a11y/noStaticElementInteractions: hover only cross-highlights; the field list gives every byte range as text */}

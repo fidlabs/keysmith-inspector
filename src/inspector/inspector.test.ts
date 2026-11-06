@@ -11,6 +11,7 @@ import {
   publicKeyOf,
   rootClaim,
   unwrapWith,
+  verifyPresentation,
   wrapTo,
 } from '@filoz/keysmith'
 import * as fee from 'filecoin-encryption-envelope'
@@ -46,6 +47,33 @@ test('a FOC-Grant header is a presentation with its request', () => {
   const view = inspectBytes(result.bytes)
   assert.equal(view.kind, 'presentation')
   assert.ok(view.kind === 'presentation' && !view.strictError && view.request && view.chain?.links.length === 2)
+})
+
+test('a grant reaches Curio the ways its gate reads one, and other credentials stay hidden', () => {
+  const token = HEADER.slice('Authorization: FOC-Grant '.length)
+  for (const [text, source] of [
+    [`Authorization: ${token}`, 'Authorization header'],
+    [`Authorization: Basic ${btoa(`FOC Grant:${token}`)}`, 'Authorization: Basic, user "FOC Grant"'],
+    [`Basic ${btoa(`FOC%20Grant:FOC-Grant ${token}`)}`, 'Authorization: Basic, user "FOC%20Grant"'],
+    [`Cookie: session=hunter2; FOC Grant=${token}`, 'FOC Grant cookie'],
+    [`FOC%20Grant=${token}`, 'FOC Grant cookie'],
+  ] as const) {
+    const result = parsed(text)
+    assert.equal(result.source, source)
+    assert.deepEqual(result.notes, [])
+    assert.equal(inspectBytes(result.bytes).kind, 'presentation')
+  }
+
+  assert.match(parsed(`Authorization: foc-grant ${token}`).notes[0]!, /refuses this spelling/)
+  assert.match(parsed(`FOC-Grant ${token.replace(/-/g, '+').replace(/_/g, '/')}`).notes[0]!, /base64url only/)
+  for (const text of [
+    `Authorization: Basic ${btoa('alice:hunter2')}`,
+    'Cookie: session=hunter2',
+    'Authorization: Bearer hunter2',
+  ]) {
+    const result = parseText(text)
+    assert.ok(!result.ok && !result.refusal.includes('hunter2'), text)
+  }
 })
 
 test('a share link, as filecoin-pin writes it, shows its grant and never decodes an Access key unless asked', () => {
@@ -172,6 +200,35 @@ test('every sample inspects, and its keys open it', async () => {
     assert.equal(claim.node, node)
     assert.equal(decodeDelivery(grant.bytes).chain.links.length, links)
   }
+
+  // The header: the keyspace Grant's chain, and its session key's request for the upload, which the gate serves.
+  const header = parsed(SAMPLES[6]!.items[0]!.text)
+  const view = inspectBytes(header.bytes)
+  assert.ok(view.kind === 'presentation' && !view.strictError && view.request)
+  const session = parseText(SAMPLES[3]!.items[1]!.text, { danger: true })
+  assert.ok(session.ok && session.key)
+  const claim = await verifyPresentation(header.bytes, {
+    pieceCid: view.request.pieceCid,
+    piece: piece.metadata,
+    chainId: 314159n,
+    now: view.request.expires - 1,
+  })
+  assert.equal(claim.bearer, privateKeyToAccount(session.key).address)
+
+  // The nested header: the nested Grant's chain (keyspace, then team/alice), and the agent's request.
+  const nested = inspectBytes(parsed(SAMPLES[7]!.items[0]!.text).bytes)
+  assert.ok(nested.kind === 'presentation' && !nested.strictError && nested.chain)
+  assert.deepEqual(
+    nested.chain.links.map((link) => [link.node, link.maxDepth]),
+    [
+      ['keyspace', 1],
+      ['scope:team/alice', 0],
+    ]
+  )
+  const agent = parseText(SAMPLES[5]!.items[1]!.text, { danger: true })
+  assert.ok(agent.ok && agent.key)
+  assert.equal(nested.chain.links[1]!.bearer, privateKeyToAccount(agent.key).address)
+  assert.deepEqual(nested.chain, decodeDelivery(parsed(SAMPLES[5]!.items[0]!.text).bytes).chain)
 })
 
 test('a claim chain or request with a nonsense expiry still inspects', () => {
