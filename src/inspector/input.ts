@@ -7,11 +7,21 @@ import { type Hex, hexToBytes } from 'viem'
 
 export type Parsed =
   // key: a private key from the paste (danger mode only); keyOnly: the bytes are that key, not a structure
-  | { ok: true; bytes: Uint8Array; source: string; notes: string[]; key?: Hex; keyOnly?: boolean }
+  // of: which of several comma-separated Grants in one value this is (filecoin-pin's GROUP_KEY_GRANT holds one per group)
+  | {
+      ok: true
+      bytes: Uint8Array
+      source: string
+      notes: string[]
+      key?: Hex
+      keyOnly?: boolean
+      of?: { index: number; count: number }
+    }
   | { ok: false; refusal: string }
 
 export interface Options {
   danger?: boolean // accept private keys instead of refusing them
+  pick?: number // which Grant of a comma-separated list to show, from 0
 }
 
 const PRIVATE_KEY_REFUSAL =
@@ -32,7 +42,7 @@ function keyResult(bytes: Uint8Array, source: string, refusal: string, danger: b
 }
 
 /** A whole `session.env`: the grant to inspect, plus the session key in danger mode. */
-function parseEnvFile(lines: string[], danger: boolean): Parsed {
+function parseEnvFile(lines: string[], danger: boolean, pick: number): Parsed {
   const vars = lines.map((line) => DOTENV.exec(line) as unknown as [string, string, string])
   const secret = vars.find(([, name]) => SECRET_VARS.has(name))
   if (secret && !danger) return { ok: false, refusal: `${secret[1]} holds a private key. ${PRIVATE_KEY_REFUSAL}` }
@@ -40,7 +50,7 @@ function parseEnvFile(lines: string[], danger: boolean): Parsed {
   const first = grant ?? secret
   if (!first)
     return { ok: false, refusal: 'Dotenv lines, but none holds a Grant (a *_GRANT variable or an fgr1_ value).' }
-  const parsed = parseText(first[0], { danger })
+  const parsed = parseText(first[0], { danger, pick })
   if (!parsed.ok || !secret || parsed.keyOnly) return parsed
   const key = parseText(secret[0], { danger })
   if (!key.ok) return key
@@ -176,7 +186,7 @@ function curioToken(text: string): Token | null {
   return { token: value, source, notes }
 }
 
-export function parseText(raw: string, { danger = false }: Options = {}): Parsed {
+export function parseText(raw: string, { danger = false, pick = 0 }: Options = {}): Parsed {
   let text = raw.trim()
   const notes: string[] = []
   let source = 'pasted bytes'
@@ -186,7 +196,7 @@ export function parseText(raw: string, { danger = false }: Options = {}): Parsed
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean)
-  if (lines.length > 1 && lines.every((line) => DOTENV.test(line))) return parseEnvFile(lines, danger)
+  if (lines.length > 1 && lines.every((line) => DOTENV.test(line))) return parseEnvFile(lines, danger, pick)
 
   // A single dotenv line, as `session.env` holds it.
   const line = DOTENV.exec(text)
@@ -199,6 +209,23 @@ export function parseText(raw: string, { danger = false }: Options = {}): Parsed
     }
     text = value.trim()
     source = name
+  }
+
+  // Several Grants in one value, comma-separated, as filecoin-pin stores one per group: show the picked one.
+  const grants = text.split(',').map((part) => part.trim())
+  if (grants.length > 1 && grants.every((part) => part.startsWith('fgr1_'))) {
+    const index = Math.min(Math.max(pick, 0), grants.length - 1)
+    const parsed = parseText(grants[index] as string, { danger })
+    if (!parsed.ok) return parsed
+    return {
+      ...parsed,
+      source: line ? `${source}, Grant ${index + 1} of ${grants.length}` : parsed.source,
+      notes: [
+        ...parsed.notes,
+        `This holds ${grants.length} Grants, comma-separated (one per group). Showing Grant ${index + 1}.`,
+      ],
+      of: { index, count: grants.length },
+    }
   }
 
   if (/^fak1_/.test(text)) {

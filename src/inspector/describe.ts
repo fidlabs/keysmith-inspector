@@ -292,7 +292,7 @@ function describePiece(bytes: Uint8Array, root: CborNode): PieceView | UnknownVi
             )
           )
         }
-        if (labels['foc/ks']) metadata = labels as unknown as Keysmith.PieceMetadata
+        if (labels['foc/gkid']) metadata = labels as unknown as Keysmith.PieceMetadata
       } else fields.push(field(`label ${key.value}`, range, 2, 'protected', show(value.value)))
     }
   } catch {
@@ -346,17 +346,17 @@ function describePiece(bytes: Uint8Array, root: CborNode): PieceView | UnknownVi
 
 const LABEL_NOTES: Record<string, string> = {
   'foc/v': 'Keysmith envelope format',
-  'foc/own': 'the keyspace owner; a gating provider serves the piece only to their grant chains',
-  'foc/ks': 'the keyspace this piece belongs to',
-  'foc/scope': 'the scope path; that scope and its ancestors can read it',
+  'foc/own': 'the group key owner; a gating provider serves the piece only to their grant chains',
+  'foc/gkid': 'the group key this piece belongs to',
+  'foc/group': 'the group path; Grants for that group and the groups above it can read it',
   'foc/salt': "16 random bytes; the piece's key is derived from it",
 }
 
 const GRANT_FIELDS: Record<number, { label: string; group: Group; note: string }> = {
-  0: { label: 'v (0)', group: 'descriptor', note: 'version 1, which implies ECDH-ES + AES-256-GCM over secp256k1' },
+  0: { label: 'v (0)', group: 'descriptor', note: 'version 2, which implies ECDH-ES + AES-256-GCM over secp256k1' },
   1: { label: 'node (1)', group: 'descriptor', note: 'what this grant unlocks' },
-  2: { label: 'owner (2)', group: 'descriptor', note: 'the wallet that roots the keyspace' },
-  3: { label: 'keyspace (3)', group: 'descriptor', note: 'the keyspace id' },
+  2: { label: 'owner (2)', group: 'descriptor', note: 'the wallet that roots the group key' },
+  3: { label: 'groupKeyId (3)', group: 'descriptor', note: 'the group key id' },
   4: {
     label: 'epk (4)',
     group: 'wrap',
@@ -381,14 +381,14 @@ function describeGrant(bytes: Uint8Array, root: CborNode): GrantView {
     )
   try {
     const grant = Keysmith.decodeGrant(bytes)
-    return { kind: 'grant', fields, grant, aad: aadOf(grant) }
+    return { kind: 'grant', fields, grant: grant as GrantView['grant'], aad: aadOf(grant) }
   } catch (err) {
     return { kind: 'grant', fields, strictError: (err as Error).message }
   }
 }
 
 const aadOf = (grant: Keysmith.Grant): Hex =>
-  bytesToHex(encode([grant.v, grant.node, hexToBytes(grant.owner), hexToBytes(grant.keyspace)]))
+  bytesToHex(encode([grant.v, grant.node, hexToBytes(grant.owner), hexToBytes(grant.groupKeyId)]))
 
 function grantFields(root: CborNode, depth: number): Field[] {
   const fields: Field[] = [
@@ -437,10 +437,10 @@ function grantFields(root: CborNode, depth: number): Field[] {
 }
 
 const LINK_FIELDS: Record<number, { label: string; group: Group; note: string }> = {
-  0: { label: 'v (0)', group: 'descriptor', note: 'claim format version 1' },
+  0: { label: 'v (0)', group: 'descriptor', note: 'claim format version 2' },
   1: { label: 'node (1)', group: 'descriptor', note: 'what the bearer may fetch' },
-  2: { label: 'owner (2)', group: 'descriptor', note: 'the keyspace owner (root only)' },
-  3: { label: 'keyspace (3)', group: 'descriptor', note: 'the keyspace id (root only)' },
+  2: { label: 'owner (2)', group: 'descriptor', note: 'the group key owner (root only)' },
+  3: { label: 'groupKeyId (3)', group: 'descriptor', note: 'the group key id (root only)' },
   4: { label: 'bearer (4)', group: 'descriptor', note: 'who may present this link, and sign the next' },
   5: { label: 'maxDepth (5)', group: 'descriptor', note: 'how many more links the bearer may add' },
   6: { label: 'chainId (6)', group: 'descriptor', note: 'the network the claims are for (root only)' },
@@ -455,7 +455,11 @@ const LINK_FIELDS: Record<number, { label: string; group: Group; note: string }>
     note: "EIP-712 ReadGrant signature: the owner's on the root, the previous bearer's after",
   },
   9: { label: 'pieceCid (9)', group: 'info', note: "where a piece link's piece lives: a locator, not signed" },
-  10: { label: 'keyspaceCommitment (10)', group: 'header', note: "the dataset's foc/kc (root only)" },
+  10: {
+    label: 'groupKeyCommitment (10)',
+    group: 'header',
+    note: "the data set's foc/kc, without its v2. prefix (root only)",
+  },
   11: { label: 'expires (11)', group: 'header', note: 'the whole chain stops working for fetching then (root only)' },
 }
 
@@ -511,15 +515,23 @@ function chainFields(chain: CborNode): Field[] {
   return fields
 }
 
-/** `[1, chain, grant bytes]` is a delivery; `[1, chain, request map]` is a presentation. */
+/** `[2, chain, grant bytes]` is a delivery; `[2, chain, request map]` is a presentation. */
 function describeArray(bytes: Uint8Array, root: CborNode): GrantView | PresentationView | UnknownView {
   const [version, chain, third] = root.items ?? []
-  if (root.items?.length !== 3 || version?.value !== 1 || chain?.major !== 4 || third == null) {
+  if (root.items?.length === 3 && version?.value === 1 && chain?.major === 4) {
     return {
       kind: 'unknown',
       fields: [field('CBOR array', root, 0, 'structure')],
       reason:
-        'An array, but not a Keysmith delivery [1, claim chain, grant] or presentation [1, claim chain, request].',
+        'A keysmith 0.1.0 (format 1) delivery or presentation. This inspector reads format 2 (keysmith 0.2.0) only, as Curio and filecoin-pin now do.',
+    }
+  }
+  if (root.items?.length !== 3 || version?.value !== 2 || chain?.major !== 4 || third == null) {
+    return {
+      kind: 'unknown',
+      fields: [field('CBOR array', root, 0, 'structure')],
+      reason:
+        'An array, but not a Keysmith delivery [2, claim chain, grant] or presentation [2, claim chain, request].',
     }
   }
   const head = [
@@ -533,7 +545,7 @@ function describeArray(bytes: Uint8Array, root: CborNode): GrantView | Presentat
         ? '[version, claim chain, grant]: the key and the right to fetch'
         : '[version, claim chain, request]: what a gating provider checks'
     ),
-    field('version', version, 1, 'structure', '1'),
+    field('version', version, 1, 'structure', '2'),
     ...chainFields(chain),
   ]
   if (third.major === 2) {
@@ -545,7 +557,7 @@ function describeArray(bytes: Uint8Array, root: CborNode): GrantView | Presentat
         1,
         'structure',
         `${third.end - third.head} B`,
-        'a Keysmith v1 grant, as bytes: the node key wrapped to the bearer'
+        'a Keysmith v2 grant, as bytes: the node key wrapped to the bearer'
       ),
     ]
     try {

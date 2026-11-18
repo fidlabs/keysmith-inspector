@@ -106,6 +106,7 @@ export function Inspector() {
     notes: string[]
     key?: Hex
     keyOnly?: boolean
+    of?: { index: number; count: number }
   } | null>(null)
   const [pasted, setPasted] = useState('')
   const [keyText, setKeyText] = useState('') // danger mode: the key to open a delivery with, sent apart from it
@@ -114,7 +115,14 @@ export function Inspector() {
   const [copied, setCopied] = useState(false)
 
   const view: View | null = useMemo(() => (input ? inspectBytes(input.bytes) : null), [input])
-  const load = (bytes: Uint8Array, source: string, notes: string[] = [], key?: Hex, keyOnly?: boolean) => {
+  const load = (
+    bytes: Uint8Array,
+    source: string,
+    notes: string[] = [],
+    key?: Hex,
+    keyOnly?: boolean,
+    of?: { index: number; count: number }
+  ) => {
     setError(null)
     setActive(null)
     setCopied(false)
@@ -126,15 +134,15 @@ export function Inspector() {
       ]
       bytes = inner.bytes
     }
-    setInput({ bytes, source, notes, key, keyOnly })
+    setInput({ bytes, source, notes, key, keyOnly, ...(of && { of }) })
   }
   const loadFile = (file: File) =>
     file.arrayBuffer().then(
       (buffer) => load(new Uint8Array(buffer), file.name),
       (err: Error) => setError(err.message)
     )
-  const inspect = (text: string, keyBox: string) => {
-    const parsed = parseText(text, { danger })
+  const inspect = (text: string, keyBox: string, pick = 0) => {
+    const parsed = parseText(text, { danger, pick })
     const key = danger && keyBox.trim() ? parseText(keyBox, { danger }) : null
     if (!parsed.ok || (key && !(key.ok && key.keyOnly))) {
       setInput(null)
@@ -146,9 +154,10 @@ export function Inspector() {
         parsed.source,
         [...parsed.notes, 'Opening it with the key from the key box.'],
         key.key,
-        parsed.keyOnly
+        parsed.keyOnly,
+        parsed.of
       )
-    } else load(parsed.bytes, parsed.source, parsed.notes, parsed.key, parsed.keyOnly)
+    } else load(parsed.bytes, parsed.source, parsed.notes, parsed.key, parsed.keyOnly, parsed.of)
   }
 
   const owners = useMemo(() => {
@@ -238,7 +247,7 @@ export function Inspector() {
         <div className="input-col">
           <label htmlFor="paste" className="caption">
             Or paste: a Grant (fgr1_…), a share link, an Authorization header (FOC-Grant, or Basic as user "FOC Grant")
-            or FOC Grant cookie as Curio reads them, a KEYSPACE_GRANT= line, or hex / base64 / base64url bytes
+            or FOC Grant cookie as Curio reads them, a GROUP_KEY_GRANT= line, or hex / base64 / base64url bytes
           </label>
           <textarea
             id="paste"
@@ -313,6 +322,22 @@ export function Inspector() {
               {note}
             </p>
           ))}
+          {input.of ? (
+            <p className="small">
+              {Array.from({ length: input.of.count }, (_, i) => (
+                <button
+                  // biome-ignore lint/suspicious/noArrayIndexKey: the Grants are positional
+                  key={i}
+                  type="button"
+                  className="button ghost compact"
+                  disabled={i === input.of?.index}
+                  onClick={() => inspect(pasted, keyText, i)}
+                >
+                  Grant {i + 1}
+                </button>
+              ))}
+            </p>
+          ) : null}
           {view.kind === 'unknown' ? <p className="notice notice-warn">{view.reason}</p> : null}
           {(view.kind === 'grant' || view.kind === 'presentation') && view.strictError ? (
             <p className="notice notice-error">Keysmith refuses this: {view.strictError}</p>
@@ -371,7 +396,7 @@ export function Inspector() {
           </div>
           {view.kind === 'grant' && view.aad ? (
             <p className="small">
-              <span className="muted">Authenticated bytes, deterministic CBOR [v, node, owner, keyspace]: </span>
+              <span className="muted">Authenticated bytes, deterministic CBOR [v, node, owner, groupKeyId]: </span>
               <span className="mono-wrap">{view.aad}</span>
             </p>
           ) : null}

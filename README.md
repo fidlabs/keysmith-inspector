@@ -6,7 +6,8 @@ piece, byte by byte. Hover a field to light up its bytes, or a byte to find its 
 
 It accepts:
 
-- a Grant as filecoin-pin prints it (`fgr1_…`), or a `GROUP_KEY_GRANT=` / `KEYSPACE_GRANT=` line from `session.env`
+- a Grant as filecoin-pin prints it (`fgr1_…`), or a `GROUP_KEY_GRANT=` line from `session.env`. filecoin-pin keeps one
+  Grant per group there, comma-separated: the inspector shows one at a time, with a button for each
 - a share link as filecoin-pin writes it (`…#v1/<root cid>&d=<grant>[&k=<Access key>]`): the grant is shown, and an
   Access key in the link is never decoded
 - a grant presentation the ways Curio's gate reads one: an `Authorization: FOC-Grant …` header, a bare
@@ -26,7 +27,7 @@ whose Access key was sent separately), showing the unwrapped key. Turning the sw
 on the page.
 
 A folded "Test data to try" section at the bottom has samples made with throwaway keys: an encrypted upload, open and
-restricted share links, and Grants for a keyspace, a scope and a two-link chain.
+restricted share links, and Grants for a group key, a group and a two-link chain.
 
 Everything runs in the browser. The built page carries a Content Security Policy with `connect-src 'none'`, so it
 cannot make network requests; check it in your browser's developer tools.
@@ -34,6 +35,9 @@ cannot make network requests; check it in your browser's developer tools.
 ## Develop
 
 Requires Node 24 and pnpm (`corepack enable`).
+
+It reads Keysmith format 2 (keysmith 0.2.0: group keys and groups), and refuses keysmith 0.1.0 data. Until 0.2.0
+is on npm, `@filoz/keysmith` is vendored (`vendor/`, synapse-sdk commit 061b1110).
 
 ```bash
 pnpm install

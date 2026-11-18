@@ -26,10 +26,10 @@ const key = () => {
   return { privateKey, account: privateKeyToAccount(privateKey) }
 }
 
-// The owner wallet and its group key (keyspace), as filecoin-pin derives them.
+// The owner wallet and its group key, as filecoin-pin derives them.
 const owner = key().account
-const ref = { owner: owner.address, keyspace: defaultGroupKeyId(owner.address) }
-const { kk, descriptor } = await ks.keyspaceKeys(owner, ref)
+const ref = { owner: owner.address, groupKeyId: defaultGroupKeyId(owner.address) }
+const { groupKey, descriptor } = await ks.deriveGroupKey(owner, ref)
 
 // 1. `add --encrypt`: inner UnixFS CAR → FEE → encrypted.fee → outer UnixFS CAR.
 async function upload(target) {
@@ -45,9 +45,9 @@ async function upload(target) {
   await rm(carPath, { force: true })
   return { pieceKey, rootCid, car, envelope }
 }
-const { pieceKey, rootCid, car, envelope } = await upload(ks.writeTarget(descriptor, kk))
+const { pieceKey, rootCid, car, envelope } = await upload(ks.writeTarget(descriptor, groupKey))
 const inner = new Uint8Array(
-  await new Response(new Blob([envelope]).stream().pipeThrough(fee.decrypt(ks.keyResolver(kk)))).arrayBuffer()
+  await new Response(new Blob([envelope]).stream().pipeThrough(fee.decrypt(ks.keyResolver(groupKey)))).arrayBuffer()
 )
 assert.equal(inner[1], 0xa2, 'the decrypted upload is the inner CAR') // a CARv1 header: varint, then a 2-entry map
 
@@ -78,7 +78,7 @@ const root = (node, bearer, maxDepth) =>
   ks.rootClaim(owner, {
     ...ref,
     chainId: CHAIN_ID,
-    kk,
+    groupKey,
     node,
     bearer: bearer.account.address,
     maxDepth,
@@ -89,8 +89,8 @@ const session = key()
 const team = key()
 const delegator = key()
 const agent = key()
-const sessionGrant = root('keyspace', session, 0)
-const sessionRoot = await root('keyspace', delegator, 1)
+const sessionGrant = root('groupKey', session, 0)
+const sessionRoot = await root('groupKey', delegator, 1)
 
 // 7, 8. The Authorization header for one gated fetch of a piece (an outer CAR), signed by the chain's final bearer and
 // checked as the gate checks it. As keysmith's authorizationHeader() builds it; use that once a release has it.
@@ -106,7 +106,7 @@ async function header(bearer, chain, piece) {
 }
 const nested = ks.delegateClaim(delegator.account, sessionRoot.chain, {
   parentKey: sessionRoot.nodeKey,
-  node: 'scope:team/alice',
+  node: 'group:team/alice',
   bearer: agent.account.address,
   maxDepth: 0,
 })
@@ -134,36 +134,36 @@ const samples = [
     ],
   },
   {
-    title: 'A Grant for the whole keyspace (kk)',
+    title: 'A Grant for the whole group key',
     about:
-      'One link from the owner, as the console grants a session key at login: node "keyspace", no further delegation.',
+      'One link from the owner, as the console grants a session key at login: node "groupKey", no further delegation.',
     items: [
-      { label: 'Grant', text: await grant(sessionGrant, 'keyspace', session) },
+      { label: 'Grant', text: await grant(sessionGrant, 'groupKey', session) },
       { label: 'Session key (Danger mode, key box)', text: `SESSION_KEY=${session.privateKey}` },
     ],
   },
   {
-    title: 'A Grant for a scope',
+    title: 'A Grant for a group',
     about:
-      'One link from the owner for scope "team" only: it opens uploads in team and below, not the rest of the keyspace.',
+      'One link from the owner for group "team" only: it opens uploads in team and below, not the rest of the group key.',
     items: [
-      { label: 'Grant', text: await grant(root('scope:team', team, 0), 'scope:team', team) },
+      { label: 'Grant', text: await grant(root('group:team', team, 0), 'group:team', team) },
       { label: 'Session key (Danger mode, key box)', text: `SESSION_KEY=${team.privateKey}` },
     ],
   },
   {
     title: 'A nested claim chain',
     about:
-      'Two links: the owner grants a session key the keyspace with one level of delegation, and the session key narrows it to scope "team/alice" for an agent.',
+      'Two links: the owner grants a session key the group key with one level of delegation, and the session key narrows it to group "team/alice" for an agent.',
     items: [
-      { label: 'Grant', text: await grant(nested, 'scope:team/alice', agent) },
+      { label: 'Grant', text: await grant(nested, 'group:team/alice', agent) },
       { label: "Agent's key (Danger mode, key box)", text: `SESSION_KEY=${agent.privateKey}` },
     ],
   },
   {
     title: 'An Authorization header for a gated fetch',
     about:
-      "What a client sends Curio to fetch the upload above: the keyspace Grant's claim chain, and a request signed by its session key naming the upload's piece. A real header is good for 4 minutes; this one has long expired.",
+      "What a client sends Curio to fetch the upload above: the group key Grant's claim chain, and a request signed by its session key naming the upload's piece. A real header is good for 4 minutes; this one has long expired.",
     items: [
       { label: 'Authorization header', text: await header(session, (await sessionGrant).chain, { pieceKey, car }) },
     ],
@@ -171,11 +171,15 @@ const samples = [
   {
     title: 'An Authorization header from a nested claim chain',
     about:
-      'The nested chain above, presented: the owner gives a session key the keyspace with one level of delegation, that key narrows it to scope "team/alice" for an agent, and the agent signs the request for a piece in team/alice. A real header is good for 4 minutes; this one has long expired.',
+      'The nested chain above, presented: the owner gives a session key the group key with one level of delegation, that key narrows it to group "team/alice" for an agent, and the agent signs the request for a piece in team/alice. A real header is good for 4 minutes; this one has long expired.',
     items: [
       {
         label: 'Authorization header',
-        text: await header(agent, (await nested).chain, await upload(ks.writeTarget(descriptor, kk, 'team/alice'))),
+        text: await header(
+          agent,
+          (await nested).chain,
+          await upload(ks.writeTarget(descriptor, groupKey, 'team/alice'))
+        ),
       },
     ],
   },
