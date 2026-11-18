@@ -19,7 +19,7 @@
     "format": "biome check --write ."
   },
   "dependencies": {
-    "@filoz/keysmith": "^0.1.0",
+    "@filoz/keysmith": "file:vendor/filoz-keysmith-0.2.0-061b1110.tgz",
     "cborg": "^6.2.1",
     "filecoin-encryption-envelope": "0.1.0",
     "react": "^19.3.1",

@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@filoz/keysmith':
-        specifier: ^0.1.0
-        version: 0.1.0(viem@2.57.16(typescript@7.0.2)(zod@4.6.7))
+        specifier: file:vendor/filoz-keysmith-0.2.0-061b1110.tgz
+        version: file:vendor/filoz-keysmith-0.2.0-061b1110.tgz(viem@2.57.16(typescript@7.0.2)(zod@4.6.7))
       cborg:
         specifier: ^6.2.1
         version: 6.2.1
@@ -114,8 +114,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@filoz/keysmith@0.1.0':
-    resolution: {integrity: sha512-rHtKdR9YDZzto9hWGrJXyBI6NvEj8LsWWgFz7fAnLBgSf4rDJv7fyi232flbC3ICiuPz3IqNo8+avQtHb8ycfw==}
+  '@filoz/keysmith@file:vendor/filoz-keysmith-0.2.0-061b1110.tgz':
+    resolution: {integrity: sha512-kgNzD8JOwKrFuvNFe3nnzhKnxKZHIaw7DSNpp5YNWOxcUdAt++90WMfI9iAitYg8QW8l2iSFY/4Z0bkkAOiCHA==, tarball: file:vendor/filoz-keysmith-0.2.0-061b1110.tgz}
+    version: 0.2.0-061b1110
     peerDependencies:
       viem: 2.x
 
@@ -687,7 +688,7 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.15':
     optional: true
 
-  '@filoz/keysmith@0.1.0(viem@2.57.16(typescript@7.0.2)(zod@4.6.7))':
+  '@filoz/keysmith@file:vendor/filoz-keysmith-0.2.0-061b1110.tgz(viem@2.57.16(typescript@7.0.2)(zod@4.6.7))':
     dependencies:
       '@noble/curves': 2.4.0
       '@noble/hashes': 2.4.0
