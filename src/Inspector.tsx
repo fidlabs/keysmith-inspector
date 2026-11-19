@@ -1,8 +1,7 @@
-import { decodeGrant, openDelivery, unwrapWith } from '@filoz/keysmith'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { type Hex, toHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { envelopeInCar, inspectBytes, type View } from './inspector/describe.ts'
+import { envelopeInCar, inspectBytes, openWithKey, type View } from './inspector/describe.ts'
 import { parseText } from './inspector/input.ts'
 import { Samples } from './Samples.tsx'
 
@@ -53,15 +52,12 @@ function KeyPanel({ privateKey, grant }: { privateKey: Hex; grant?: { bytes: Uin
     }
   }, [privateKey])
   const { bytes, chained } = grant ?? {}
-  const [opened, setOpened] = useState<{ key?: Hex; node?: string; error?: string } | null>(null)
+  const [opened, setOpened] = useState<{ key?: Hex; node?: string; unverified?: boolean; error?: string } | null>(null)
   useEffect(() => {
     setOpened(null)
     if (!bytes || !account) return
-    const opening = chained
-      ? openDelivery(privateKey, bytes).then(({ key, claim }) => ({ key, node: claim.node }))
-      : unwrapWith(privateKey, bytes).then((key) => ({ key, node: decodeGrant(bytes).node }))
-    opening.then(
-      ({ key, node }) => setOpened({ key: toHex(key), node }),
+    openWithKey(privateKey, bytes, chained === true).then(
+      ({ key, node, unverified }) => setOpened({ key: toHex(key), node, ...(unverified && { unverified }) }),
       (err: Error) => setOpened({ error: err.message })
     )
   }, [privateKey, bytes, chained, account])
@@ -91,6 +87,12 @@ function KeyPanel({ privateKey, grant }: { privateKey: Hex; grant?: { bytes: Uin
         <span className="small">
           <span className="muted">Opens it. Unwrapped key for node {JSON.stringify(opened.node)}: </span>
           <span className="mono-wrap">{opened.key}</span>
+        </span>
+      ) : null}
+      {opened?.unverified ? (
+        <span className="small muted">
+          The claim chain narrows a group to a piece, so keysmith can verify it only with the piece's labels, which are
+          inside the piece: not verified here. A provider's gate verifies it when it is presented.
         </span>
       ) : null}
       {opened?.error ? <span className="small">Does not open it: {opened.error}</span> : null}

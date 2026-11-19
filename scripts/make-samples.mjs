@@ -15,6 +15,7 @@ const { encryptPath, ENCRYPTED_FILE_NAME } = await import(join(fp, 'dist/common/
 const { createCarFromPath } = await import(join(fp, 'dist/core/unixfs/index.js'))
 const { defaultGroupKeyId, newPieceKey } = await import(join(fp, 'dist/common/group-key.js'))
 const { createShare } = await import(join(fp, 'dist/common/share-link.js'))
+const { openGroupKeyGrant } = await import(join(fp, 'dist/common/group-key-grant.js'))
 const { calculate } = await import(join(fp, 'node_modules/@filoz/synapse-core/dist/src/piece/index.js'))
 
 const VIEWER = 'https://viewer.invalid/' // the fragment is what matters; no viewer holds this sample upload
@@ -183,7 +184,63 @@ const samples = [
       },
     ],
   },
+  ...(await privateSamples()),
 ]
+
+// 9, 10, 11. A private upload (add --private): its share links carry a Delivery and the providers (s=), and a reader
+// fetches /download/<piece> with a request it signs. The upload above stands in for the private one.
+async function privateSamples() {
+  const pieceCid = (await calculate(car)).toString()
+  const target = { pieceCid, providers: ['https://sp.invalid/pdp'], chainId: Number(CHAIN_ID) }
+  const byOwner = await createShare({
+    sender: { owner },
+    rootCid,
+    labels,
+    mode: 'open',
+    viewer: VIEWER,
+    private: target,
+  })
+  // A session key holds a Grant for group team that allows one more link, and delegates a piece in team/alice to the
+  // link's key: the chain narrows a group to a piece, which keysmith verifies only with the piece's labels.
+  const member = key()
+  const opened = await openGroupKeyGrant(await grant(root('group:team', member, 1), 'group:team', member), {
+    sessionKey: member.privateKey,
+    walletAddress: owner.address,
+    chainId: Number(CHAIN_ID),
+  })
+  const inTeam = await upload(ks.writeTarget(descriptor, groupKey, 'team/alice'))
+  const bySession = await createShare({
+    sender: { grants: [opened], sessionKey: member.privateKey },
+    rootCid: inTeam.rootCid,
+    labels: inTeam.pieceKey.appMetadata,
+    mode: 'open',
+    viewer: VIEWER,
+    private: { ...target, pieceCid: (await calculate(inTeam.car)).toString() },
+  })
+  const token = (await header(session, (await sessionGrant).chain, { pieceKey, car })).slice(
+    'Authorization: FOC-Grant '.length
+  )
+  return [
+    {
+      title: "A private upload's Share link, from the owner",
+      about:
+        "An open link to a private upload (add --private): d= is a Delivery, one root claim from the owner for this piece, borne by the link's Access key, with the piece CID as its locator; s= names the providers. Turn on Danger mode to open it.",
+      items: [{ label: 'Share link', text: byOwner.link }],
+    },
+    {
+      title: "A private upload's Share link, from a session key",
+      about:
+        "An upload in group team/alice, shared by a session key: its Grant for group team, then a piece claim it delegates to the link's Access key (two links). keysmith verifies a chain that narrows a group to a piece only with the piece's labels, so Danger mode opens it unverified and says so.",
+      items: [{ label: 'Share link', text: bySession.link }],
+    },
+    {
+      title: 'A foc_grant request URL',
+      about:
+        "The query form of an Authorization header, as the viewer fetches a private upload: the session key's grant chain and its request for the upload's piece, as Curio's gate reads them. This one has long expired.",
+      items: [{ label: 'Request URL', text: `https://sp.invalid/pdp/download/${pieceCid}?foc_grant=${token}` }],
+    },
+  ]
+}
 
 await writeFile(new URL('../src/samples.json', import.meta.url), `${JSON.stringify(samples, null, 2)}\n`)
 console.log(

@@ -74,6 +74,22 @@ export function bytesFromText(text: string): Uint8Array {
 }
 
 /** A share link's fragment, as filecoin-pin writes it: `v1/<root cid>&d=<grant>[&k=<Access key>]`. */
+/** The providers a private upload's link names (`s=`): comma-separated, URI-encoded http(s) URLs. Null if one isn't. */
+function providersOf(value: string | undefined): string[] | null {
+  if (value == null || value === '') return []
+  const urls: string[] = []
+  for (const part of value.split(',')) {
+    try {
+      const url = new URL(decodeURIComponent(part))
+      if ((url.protocol !== 'https:' && url.protocol !== 'http:') || url.username || url.password) return null
+      urls.push(url.toString().replace(/\/+$/, ''))
+    } catch {
+      return null
+    }
+  }
+  return urls
+}
+
 function parseShareLink(fragment: string, danger: boolean): Parsed {
   const version = fragment.slice(0, fragment.indexOf('/'))
   if (version !== 'v1') return { ok: false, refusal: `An unknown share link version: ${JSON.stringify(version)}.` }
@@ -82,12 +98,15 @@ function parseShareLink(fragment: string, danger: boolean): Parsed {
   for (const param of params) {
     const at = param.indexOf('=')
     const name = at < 0 ? param : param.slice(0, at)
-    if (!['d', 'k'].includes(name) || values.has(name))
+    if (!['d', 's', 'k'].includes(name) || values.has(name))
       return { ok: false, refusal: `A v1 share link with an unexpected part: ${JSON.stringify(name)}.` }
     values.set(name, param.slice(at + 1))
   }
   const grant = values.get('d')
   const access = values.get('k')
+  const providers = providersOf(values.get('s'))
+  if (providers === null)
+    return { ok: false, refusal: 'A share link whose s= names a provider that is not an http(s) URL.' }
   if (!rootCid || !grant)
     return { ok: false, refusal: 'A v1 share link, but not of the form v1/<root cid>&d=<grant>[&k=<Access key>].' }
   let bytes: Uint8Array
@@ -96,9 +115,14 @@ function parseShareLink(fragment: string, danger: boolean): Parsed {
   } catch {
     return { ok: false, refusal: 'A v1 share link whose d= part is not base64url.' }
   }
+  // A CBOR array is a Delivery: a private upload's link, which also carries the right to fetch it.
+  const delivery = bytes[0] != null && bytes[0] >> 5 === 4
   const notes = [
-    `Share link v1 for the upload with root CID ${rootCid}. It carries a grant wrapped to the link's Access key.`,
+    delivery
+      ? `Share link v1 for the private upload with root CID ${rootCid}. It carries a Delivery: a claim chain whose final claim names the piece (its CID is the claim's locator) and is borne by the link's Access key, plus the piece key wrapped to it. The reader signs a request with the Access key and fetches /download/<piece> on the authenticated path.`
+      : `Share link v1 for the upload with root CID ${rootCid}. It carries a grant wrapped to the link's Access key.`,
   ]
+  if (providers.length > 0) notes.push(`Providers that hold the piece (s=): ${providers.join(', ')}.`)
   let key: Hex | undefined
   if (access != null) {
     const open = parseText(access, { danger })
@@ -123,13 +147,30 @@ const GRANT_COOKIE = /(?:^|;)\s*FOC(?: |%20)Grant=/
 
 type Token = { token: string; source: string; notes: string[] } | { refusal: string }
 
+/** A `foc_grant` query parameter, in a URL or on its own, as the viewer and Curio's gate use it. */
+const GRANT_QUERY = /(?:^|[?&])foc_grant=([^&#\s]*)/
+
 /**
  * A grant token as Curio's gate takes it from a request (curio lib/keysmith, `Credential`): `Authorization: FOC-Grant
- * <token>`, a bare `Authorization: <token>`, Basic auth as user `FOC Grant`, or a `FOC Grant` cookie. Null for none of
- * these. Other credentials in the paste (another user's password, other cookies) are never decoded or shown.
+ * <token>`, a bare `Authorization: <token>`, Basic auth as user `FOC Grant`, a `FOC Grant` cookie, or a `foc_grant`
+ * query parameter (a `/download/` URL, as the viewer fetches a private upload). Null for none of these. Other
+ * credentials in the paste (another user's password, other cookies) are never decoded or shown.
  */
 function curioToken(text: string): Token | null {
   const notes: string[] = []
+  const query = /^Authorization:/i.test(text) ? null : GRANT_QUERY.exec(text)
+  if (query) {
+    let token: string
+    try {
+      token = decodeURIComponent(query[1] as string)
+    } catch {
+      return { refusal: 'A foc_grant query whose value is not URL-encoded text.' }
+    }
+    if (!token) return { refusal: 'A foc_grant query with no value: no grant.' }
+    const piece = /\/download\/([a-z0-9]+)/i.exec(text)?.[1]
+    if (piece) notes.push(`A request for piece ${piece} on the authenticated path (/download/).`)
+    return { token, source: 'foc_grant query', notes }
+  }
   const auth = /^Authorization:\s*(.*)$/is.exec(text)
   let value = auth ? (auth[1] as string).trim() : text
   let source: string | undefined

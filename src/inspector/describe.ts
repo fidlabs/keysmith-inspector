@@ -7,6 +7,7 @@ import * as Keysmith from '@filoz/keysmith'
 import { encode } from 'cborg'
 import { constants } from 'filecoin-encryption-envelope'
 import { bytesToHex, type Hex, hexToBytes } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 import { type CborNode, parseCbor } from './cbor.ts'
 
 export type Group =
@@ -610,4 +611,35 @@ function describeArray(bytes: Uint8Array, root: CborNode): GrantView | Presentat
     fields: [field('CBOR array', root, 0, 'structure')],
     reason: 'An array with a claim chain, but its third item is neither grant bytes nor a request map.',
   }
+}
+
+/**
+ * Danger mode: open a delivery (`chained`) or a bare grant with `privateKey`, giving the unwrapped key and the node it
+ * is for. A delivery is verified with keysmith's `openDelivery`, except a chain that narrows a group to a piece (a
+ * session key's share of a private upload): keysmith verifies that only with the piece's labels, which are inside the
+ * piece. That one is opened unverified (`unverified: true`), checking only that the key is its bearer; the provider's
+ * gate verifies the chain when it is presented.
+ */
+export async function openWithKey(
+  privateKey: Hex,
+  bytes: Uint8Array,
+  chained: boolean
+): Promise<{ key: Uint8Array; node: string; unverified?: boolean }> {
+  if (!chained)
+    return {
+      key: await Keysmith.unwrapWith(privateKey, Keysmith.decodeGrant(bytes)),
+      node: Keysmith.decodeGrant(bytes).node,
+    }
+  try {
+    const { key, claim } = await Keysmith.openDelivery(privateKey, bytes)
+    return { key, node: claim.node }
+  } catch (err) {
+    if (!(err as Error).message.includes("checking it needs the piece's labels")) throw err
+  }
+  const { chain, grant } = Keysmith.decodeDelivery(bytes)
+  const final = chain.links.at(-1)
+  if (final?.bearer.toLowerCase() !== privateKeyToAccount(privateKey).address.toLowerCase()) {
+    throw new Error('This delivery is for another bearer')
+  }
+  return { key: await Keysmith.unwrapWith(privateKey, grant), node: final.node, unverified: true }
 }

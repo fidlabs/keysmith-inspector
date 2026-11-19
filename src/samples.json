@@ -4,8 +4,8 @@
     "about": "What `filecoin-pin add --encrypt` stores, and what a gateway serves for its root CID: an outer CAR holding encrypted.fee, whose ciphertext is the inner CAR of hello.txt. The inspector finds the envelope inside the CAR.",
     "items": [
       {
-        "label": "Outer CAR, base64 (root bafkreihchvvqp5yo3gikvai6lbda7amvixtd3hm3gku5y632y3yzkzi4sy)",
-        "text": "OqJlcm9vdHOB2CpYJQABVRIg4j1rB/cO2ZCqgR5YRg+BlUXmPZ2bMqnce3rG8ZVlHJZndmVyc2lvbgGhBAFVEiDiPWsH9w7ZkKqBHlhGD4GVReY9nZsyqdx7esbxlWUcltCDWP6nAToAAQEAA3gYYXBwbGljYXRpb24vdm5kLmlwbGQuY2FyBUeZ2h+CwiTnEHgoYXBwbGljYXRpb24vdm5kLmZpbGVjb2luLWVuY3J5cHRpb24rY29zZSAaAAQAADoAAQD8GOk6AAEA/6RlZm9jL3YCZ2ZvYy9vd254KjB4MmZkMGNhMTQyMTlmYjU0ZWE5MWQwNjAxYTdmOWEzYzAyYTFlMzQzZmhmb2MvZ2tpZHgiMHhlNDU1OTU1NTJjOTc1MjUxNDI4ZjkyNzBiMzNhMTZiZGhmb2Mvc2FsdHgiMHg4YjczOTZhYjk4OTY0NmJiNDNjMWM2YzI2MjVjMmY0Y6D2MajGvY3TqqAQn81i+X6Mo3b9koQ1rM/JBcV0ME2DX5p71+lPeEarOpgyjTQiWZGaZCj4ZX/JNztzEh3psQRa4itW9dEASDVzlAYHFvW7LhXmUxLEQ28XI6PGSrSwJzeag61nB+Svs/SMwGty8PT3LCFQ1wvLuitFJdgJh4rWMaKBaTL/Jnt/xo15ds2aG6GAa9Sg6zNHcThWH3bMeXs+HtzH5LYXO2LwnEgItjnv7ulmeQM64G83Kh30Tr/Lrt9yHnBepT7Beo39G4fpw070XVzt6qAYeCdV9frwr2QfwImEW8rW/Ogjvu7frUlAlm2VZpSdz1vypNXF",
+        "label": "Outer CAR, base64 (root bafkreifs6zpqdtzq3xu3c52rlmelpbepb2o25ptrmyboqph5xvwcud3vpe)",
+        "text": "OqJlcm9vdHOB2CpYJQABVRIgsvZfAc8w3emxd1FbCLeEjw6drr5xZgLoPP29bCoPdXlndmVyc2lvbgGhBAFVEiCy9l8BzzDd6bF3UVsIt4SPDp2uvnFmAug8/b1sKg91edCDWP6nAToAAQEAA3gYYXBwbGljYXRpb24vdm5kLmlwbGQuY2FyBUeinIr18u/JEHgoYXBwbGljYXRpb24vdm5kLmZpbGVjb2luLWVuY3J5cHRpb24rY29zZSAaAAQAADoAAQD8GOk6AAEA/6RlZm9jL3YCZ2ZvYy9vd254KjB4ODExMzdiZWI5YmM1N2IyZmRmNjUwYTY4OWJhYWU5YTZjYmY4MmM0ZWhmb2MvZ2tpZHgiMHgxMGFkNzA1M2I2MTdkY2VlNjc4MjNkMGZmNzU0MDFjMGhmb2Mvc2FsdHgiMHhkNTc4NTdhZTE3NjgwYWVhNGYwOGQ2MDY4ZWVlOGQyM6D2UOo6+aqQqvyhup2P+r4ldpZPuKvuBi6YQvCmkBRIUX+Reo0+gSukqr56ZCYcX8h+LPecEPf3zQcpN3kTkgXjBrS32hRFKkNM3Anw7OvgKqEyOpikVOqIf1cVFTPfI1da/BQoFoR3oLQH7KJH/5MEwD3sii41fFs6rYu5mFsesmQ9u8xK33mAwwZGJQuH3sDMVGK07MPFnrnzJd5Nyhr4Ec+9cAqlIfl5PNdXYT8pzA5eg6j++c4Chr6dyV9H2dyZgactraFMbOG+XD6//Cjpt0CKpmpyp0tCHTkY0j6KD76nCMG8ByMgHm2F7WVvCGjfVSbTY10Jytj8",
         "file": "upload.car"
       }
     ]
@@ -16,7 +16,7 @@
     "items": [
       {
         "label": "Share link",
-        "text": "https://viewer.invalid/#v1/bafkreihchvvqp5yo3gikvai6lbda7amvixtd3hm3gku5y632y3yzkzi4sy&d=pwACAXgocGllY2U6MHg4YjczOTZhYjk4OTY0NmJiNDNjMWM2YzI2MjVjMmY0YwJUL9DKFCGftU6pHQYBp_mjwCoeND8DUORVlVUsl1JRQo-ScLM6Fr0EWEEEfrHDcI_a3PN5P6DprS_SAy9YmuDmmPL2RSxMuUGn0iQHhTAZpRKOaLTjGV8BR26iu8dTg4izbNmSn0LRJs-JTwVMp1ZLDUS_tZzlQFr9BlgwkemP6ayn4ltkHWHdhyXQ6E8-AG5f1MAWiHqX5Ve1wMp8KJN_BTmKf17G4UYS1YhX&k=fak1_9FlF3vCE9ScQt1C3z7R7M0jQGw0-2YvvlChqr-rcQz0"
+        "text": "https://viewer.invalid/#v1/bafkreifs6zpqdtzq3xu3c52rlmelpbepb2o25ptrmyboqph5xvwcud3vpe&d=pwACAXgocGllY2U6MHhkNTc4NTdhZTE3NjgwYWVhNGYwOGQ2MDY4ZWVlOGQyMwJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEWEEEW3s2K6-2TdfFIX2gvP4iBnvmI1nPvB4CInH1Rl6nVaYm8fFM8Lcgv8-vRJjkGZC134e6s1U1Npy8wLxsmTHU9QVM6BHA9YXFiK2Xjmh8BlgwQ1zC8oEr6wTSeUrY4coSb5wQotuNwbu2CgvF1bY8NK2gR15Ktd-MusRkPh6IcrQt&k=fak1_WvxF4gpPQrPkhiQmtybSx0Zgn9DrkAVNQEGlshH8d6c"
       }
     ]
   },
@@ -26,11 +26,11 @@
     "items": [
       {
         "label": "Share link",
-        "text": "https://viewer.invalid/#v1/bafkreihchvvqp5yo3gikvai6lbda7amvixtd3hm3gku5y632y3yzkzi4sy&d=pwACAXgocGllY2U6MHg4YjczOTZhYjk4OTY0NmJiNDNjMWM2YzI2MjVjMmY0YwJUL9DKFCGftU6pHQYBp_mjwCoeND8DUORVlVUsl1JRQo-ScLM6Fr0EWEEE6uubfTv7GFnU5SsIZYZyG7NdlOj5i5BobURScaH_92ZiwnkCnKB3EVzlyEznsKcKjZ9mkEUaQ0mwFTq63hh5eAVMFTjuMeH0e0P_W7POBlgwdJeQOlgOwD4i-bAHkGBk3x796cCOwgCjRLf0myeftVj1RPKfzDqXzDOo3s-ImMEn"
+        "text": "https://viewer.invalid/#v1/bafkreifs6zpqdtzq3xu3c52rlmelpbepb2o25ptrmyboqph5xvwcud3vpe&d=pwACAXgocGllY2U6MHhkNTc4NTdhZTE3NjgwYWVhNGYwOGQ2MDY4ZWVlOGQyMwJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEWEEE-yS5MPN_I0K9ngvs_2lZkighnCMU5PjGfws7K1BN4r5oKXqJTxmyinjNVrzaJFtqOLk3dGONrokzQW-uqrz7hQVMS5YWfkYdgWZ6PENrBlgwhxC5GVdcU9Q_tbKiJ22Voh1VhSTSnitPuYI36T5OBA3P9w1o11PLdBOGvFv1Xakc"
       },
       {
         "label": "Access key",
-        "text": "fak1_mO6UQuRzeYZNVWCl2toJWQVQVjeuqpDWoUspyI9Pvm8"
+        "text": "fak1_x3bVOibzx4t4GrrG9OWjVGrvgrVHCwR390vtysLgxDc"
       }
     ]
   },
@@ -40,11 +40,11 @@
     "items": [
       {
         "label": "Grant",
-        "text": "fgr1_gwKBqwACAWhncm91cEtleQJUL9DKFCGftU6pHQYBp_mjwCoeND8DUORVlVUsl1JRQo-ScLM6Fr0EVBsbhUnrqOXLKuCBdPbbTCV8DnvkBQAGGgAEyy8HUJ4qTKBt1W8UEyu07d0S24YIWEH4xx0v2etz-nbi7OycXfWjosH2F6ZwM4mv9tHhl760BTGg9fQaV3QqwIhs88vm4yJ3DAl5A5W8uaIVpyqVhuKuHApQnipMoG3VbxQTK7Tt3RLbhgsa9IZXAFi6pwACAWhncm91cEtleQJUL9DKFCGftU6pHQYBp_mjwCoeND8DUORVlVUsl1JRQo-ScLM6Fr0EWEEEv-On5s9JXfVbTbqkxy8LMCuCeOabOmFj9fyDJjeXzNTLwSjMB5c9K0M6VFNoaXrX8mFX2nuEAKUs477Nb2wmMAVMdnda8HpZnaK1rlMdBlgwLWjopdFojbdAjTKN5hTMjRzHd2pQwlw_emVZI2XcoIY50atS3YlCkg7DmkQVJT7K"
+        "text": "fgr1_gwKBqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVLx_MvxQN3Q3bDR_Pe5OebpbfUFJBQAGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEF8sxgn3CH5GolrKEUMnWmctVWr0YbrdGrnkyO6zhiJsUji4Sm2r6PaBRxly3yv33ygO4kNO5L8Exzr4mDvDfEqGwpQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAFi6pwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEWEEECztDFIla7KKeVD4a8OIwH4aRydnBFotuz9tLewOQoaIbkT0iKoc31cgrnUolt2Ecnwu-goAQbFW_JRt_zIOLGwVM6ujo4sNd5qfqH7QcBlgwbW0OWCqDqcNfwhmdXe6Qvi6m-k6E4rL8BxGQU7Ef9tnPUvyIkV1129wefdp_JJr2"
       },
       {
         "label": "Session key (Danger mode, key box)",
-        "text": "SESSION_KEY=0x4339152046946287f75e12bfbf3629e164e698d7e9106108717a5d575a601c1e"
+        "text": "SESSION_KEY=0x23a0f165aee74479b2ee275c9b5c7d0b5ecc711e6677833c988c933d94f964cf"
       }
     ]
   },
@@ -54,11 +54,11 @@
     "items": [
       {
         "label": "Grant",
-        "text": "fgr1_gwKBqwACAWpncm91cDp0ZWFtAlQv0MoUIZ-1TqkdBgGn-aPAKh40PwNQ5FWVVSyXUlFCj5JwszoWvQRUobmgyjjhA6BMMfr6ck-2FT8oIMYFAAYaAATLLwdQteUzreKGQUL-OgapeTjbSwhYQQfeqZ9RaQWj22CXThUIULVki7puLQ1nrVUfShCbTaRlQ7-2Fq0FkazWFYkJgeLFF1djKL2FVFf3fsXFV2xydigcClCeKkygbdVvFBMrtO3dEtuGCxr0hlcAWLynAAIBamdyb3VwOnRlYW0CVC_QyhQhn7VOqR0GAaf5o8AqHjQ_A1DkVZVVLJdSUUKPknCzOha9BFhBBMwevOAd6Rk17vFCZ1zlhjDOOrMSC1YFsaSsMZbenMYrouU1p7adosEbgJsz9Wkv-F1R3Mxh1_EGWB99LFZ5AewFTEG9RuZVe4C0C3mFFgZYMBHT48sfLmEW7cxS8RPTgRc0zP7vSKcV5_tPcFPaFZqDnoCztIKmve0_i2fPqI4-3w"
+        "text": "fgr1_gwKBqwACAWpncm91cDp0ZWFtAlSBE3vrm8V7L99lCmibqummy_gsTgNQEK1wU7YX3O5ngj0P91QBwARUGrLRNt1fIwWhShI5Mx9lZLVzXJkFAAYaAATLLwdQiEyU6FHmog_JkdUBI1-E1whYQTe5Mm5QhHOkTPqqfkRO5TL4SO2C8NhzY0Znvg9DK36_ZhiiNEaANrZXaCnwFWodf248hRP-WnvzQJP0WmhknggcClAWbZYbQEmsSzr8OEEuSs8HCxr0hlcAWLynAAIBamdyb3VwOnRlYW0CVIETe-ubxXsv32UKaJuq6abL-CxOA1AQrXBTthfc7meCPQ_3VAHABFhBBBD1c6UNHeEOXgga9PjVYIQJq95Y9Rz_a16NEjbJrSHyg4OkxgMstHsDortGfeYqbWGlWwBgerc-mur3UEK_BfEFTFbjzbjIQkFCPkLAegZYMMTLzByWFx5-i5YNOXb6RVUhOdkxtYPUcOH-PBmGugh4VbeZmnJFGWuHdXXGAydZaA"
       },
       {
         "label": "Session key (Danger mode, key box)",
-        "text": "SESSION_KEY=0x1186aff75d74c996918b52d2d21aade345c3ba91b7dc1939265604c561f59997"
+        "text": "SESSION_KEY=0x12666cc4ccf87d66a30fe60d2e78ae79308aae844fc4e14f89ddd7f95cb7cafc"
       }
     ]
   },
@@ -68,11 +68,11 @@
     "items": [
       {
         "label": "Grant",
-        "text": "fgr1_gwKCqwACAWhncm91cEtleQJUL9DKFCGftU6pHQYBp_mjwCoeND8DUORVlVUsl1JRQo-ScLM6Fr0EVHJU2BP762WnoEHRw7sqjzDHdqQaBQEGGgAEyy8HUJ4qTKBt1W8UEyu07d0S24YIWEFkdF9J4Jxo1oMBdXM7gR9dYaU1QLj2D_F0fcF1X1ipMEUFJn9Myz6-UiDg42SatFXHXgSY2Jgj8Aw6KJ6ZAXWrGwpQnipMoG3VbxQTK7Tt3RLbhgsa9IZXAKYAAgFwZ3JvdXA6dGVhbS9hbGljZQRUPa_d0Yd4QE94zV8OoG4bDrjKBoIFAAdQSw-K-zzIeABpfxZzQW0FEghYQVjb0cDUeM5cZBF-byh0BC62UlYyaYZ3ZmFuId76xBG4Au5_J08RvIZW5pg66mlcfgzL2r7sduHcVzUtPa4pIvcbWMKnAAIBcGdyb3VwOnRlYW0vYWxpY2UCVC_QyhQhn7VOqR0GAaf5o8AqHjQ_A1DkVZVVLJdSUUKPknCzOha9BFhBBGpDVOMMDGPHpkH588sROP6jsIXXaPoa6Cw5Taol8o17bEL9MYa-blgBqn47RK6QHDOM0Lvm7c4pd6f6YeXvKdIFTKs3U1LHI2_U9cR48AZYMHH_CYC2c0quL9Soi8p1bdsx4Ma8GkVxT2Zy_reAJ3euNVEwY7e6X_k1XXMsnaKE1w"
+        "text": "fgr1_gwKCqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVGdqAc1zmAzOhH0WHU27JEwIqW7iBQEGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEGuslndM88GGlSz7gINzBaE50v2hmX7oz042mAjAjWNtAjS9Hok196bcnHNCEvqegYM2rny8DtQimo4DD7AXEaLHApQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAKYAAgFwZ3JvdXA6dGVhbS9hbGljZQRUcVu2Tg120VX90nlQPXXN7vojxrYFAAdQdkVOak4FCTJSLC9AbWTQMwhYQeBlr5psdjk40w2s-ijDiTGGxcstfaRcssYAAvf4gYBjbYIWVVPEyB869NF3MIGHZDlv1BVnDqJzYoQiwY3RrqsbWMKnAAIBcGdyb3VwOnRlYW0vYWxpY2UCVIETe-ubxXsv32UKaJuq6abL-CxOA1AQrXBTthfc7meCPQ_3VAHABFhBBEkhgymTKfy0sl8Di0RA-BiXwIcsIkJXq-uA2BTOFQAnc7gpGRwGxD2VkWQ-wmE8KpAI8MKQw54YXQgfbbWeBFgFTLCrmHZcUu9DHhVBTwZYMOZ51uSYh_uWbqXMjCgdEay19HSfgrvKBRwnGGj3tAefJ9w0WBMWHScir_yReYeaqA"
       },
       {
         "label": "Agent's key (Danger mode, key box)",
-        "text": "SESSION_KEY=0x2121d776056a674cec0da91ee1ab0fe4bf89fe0610f33da7249b6def5590a486"
+        "text": "SESSION_KEY=0x10685987b334ab06c4e75ca397372702f0397c2881248cb160b01b0027040e54"
       }
     ]
   },
@@ -82,7 +82,7 @@
     "items": [
       {
         "label": "Authorization header",
-        "text": "Authorization: FOC-Grant gwKBqwACAWhncm91cEtleQJUL9DKFCGftU6pHQYBp_mjwCoeND8DUORVlVUsl1JRQo-ScLM6Fr0EVBsbhUnrqOXLKuCBdPbbTCV8DnvkBQAGGgAEyy8HUJ4qTKBt1W8UEyu07d0S24YIWEH4xx0v2etz-nbi7OycXfWjosH2F6ZwM4mv9tHhl760BTGg9fQaV3QqwIhs88vm4yJ3DAl5A5W8uaIVpyqVhuKuHApQnipMoG3VbxQTK7Tt3RLbhgsa9IZXAKMAWCgBVZEgI5oDBcd7JBwbYRb7yVTn7Vv4AaQbY2B4ItSvTELA2PZKvDkkARpq_gNAAlhB5DAB1ZuOjWSgJJxxXFWH_6UeU68aDndTFLbI2umnlS8YrBSn4pvQMde4DfWkQGeMyx3Q8LxLJbNV7PTG4gsxVhw"
+        "text": "Authorization: FOC-Grant gwKBqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVLx_MvxQN3Q3bDR_Pe5OebpbfUFJBQAGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEF8sxgn3CH5GolrKEUMnWmctVWr0YbrdGrnkyO6zhiJsUji4Sm2r6PaBRxly3yv33ygO4kNO5L8Exzr4mDvDfEqGwpQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAKMAWCgBVZEgI5oDBd1i6eq7uhFThzFCEoZxXEa1aHOXuE9iSy3Y6Kw6mokFARpq_k6SAlhBqz_MW5gY5rbEwXR4NnE69d4B8mSsD1UtwerLcPoKTlc2QpBWShZv1iBUftOiUiiTgal-gx9JcNntRtVLZfdwjBs"
       }
     ]
   },
@@ -92,7 +92,37 @@
     "items": [
       {
         "label": "Authorization header",
-        "text": "Authorization: FOC-Grant gwKCqwACAWhncm91cEtleQJUL9DKFCGftU6pHQYBp_mjwCoeND8DUORVlVUsl1JRQo-ScLM6Fr0EVHJU2BP762WnoEHRw7sqjzDHdqQaBQEGGgAEyy8HUJ4qTKBt1W8UEyu07d0S24YIWEFkdF9J4Jxo1oMBdXM7gR9dYaU1QLj2D_F0fcF1X1ipMEUFJn9Myz6-UiDg42SatFXHXgSY2Jgj8Aw6KJ6ZAXWrGwpQnipMoG3VbxQTK7Tt3RLbhgsa9IZXAKYAAgFwZ3JvdXA6dGVhbS9hbGljZQRUPa_d0Yd4QE94zV8OoG4bDrjKBoIFAAdQSw-K-zzIeABpfxZzQW0FEghYQVjb0cDUeM5cZBF-byh0BC62UlYyaYZ3ZmFuId76xBG4Au5_J08RvIZW5pg66mlcfgzL2r7sduHcVzUtPa4pIvcbowBYKAFVkSAjhAMFLMjXp76sx6dtOMT0FVS1VH46jbMi0m9KJaTDBKyTRyEBGmr-A0ACWEEiQIG_iXwngxSIizOfo41m5BL8rBNZmpbxj-WE4TjYikQqIxMzJ6iF3hphup7dDhNd0Y-zYTitqMCB3UM0oUCvHA"
+        "text": "Authorization: FOC-Grant gwKCqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVGdqAc1zmAzOhH0WHU27JEwIqW7iBQEGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEGuslndM88GGlSz7gINzBaE50v2hmX7oz042mAjAjWNtAjS9Hok196bcnHNCEvqegYM2rny8DtQimo4DD7AXEaLHApQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAKYAAgFwZ3JvdXA6dGVhbS9hbGljZQRUcVu2Tg120VX90nlQPXXN7vojxrYFAAdQdkVOak4FCTJSLC9AbWTQMwhYQeBlr5psdjk40w2s-ijDiTGGxcstfaRcssYAAvf4gYBjbYIWVVPEyB869NF3MIGHZDlv1BVnDqJzYoQiwY3RrqsbowBYKAFVkSAjhAMF4u0xFBPaOccMQrTGCoV7NNyQQ0dZVyYgN7wAZKv4Vj8BGmr-TpICWEE2T2jNysqqk_qF4Kt3_u55ASdhQ8IIHYhTdGkxhfKaFia0itwA1qsnFgNyoZIE0nQ_--_VTKP37qLtWJppVKubHA"
+      }
+    ]
+  },
+  {
+    "title": "A private upload's Share link, from the owner",
+    "about": "An open link to a private upload (add --private): d= is a Delivery, one root claim from the owner for this piece, borne by the link's Access key, with the piece CID as its locator; s= names the providers. Turn on Danger mode to open it.",
+    "items": [
+      {
+        "label": "Share link",
+        "text": "https://viewer.invalid/#v1/bafkreifs6zpqdtzq3xu3c52rlmelpbepb2o25ptrmyboqph5xvwcud3vpe&d=gwKBrAACAXgocGllY2U6MHhkNTc4NTdhZTE3NjgwYWVhNGYwOGQ2MDY4ZWVlOGQyMwJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVLee-bUQMRpes-iRumdkPykTnx1aBQAGGgAEyy8HUIgXPgOnauzUiZIlb1BXZ3AIWEGxy3Jds_R_hOt8W_oIQmEYh4-MfbjADFHSXO3kohmbgG5GvzxtCqT4MkIzbPQm7l8cqdAsFK8vylZ9IFdGGz7aHAlYKAFVkSAjmgMF3WLp6ru6EVOHMUIShnFcRrVoc5e4T2JLLdjorDqaiQUKUBZtlhtASaxLOvw4QS5KzwcLGmsl2qJY26cAAgF4KHBpZWNlOjB4ZDU3ODU3YWUxNzY4MGFlYTRmMDhkNjA2OGVlZThkMjMCVIETe-ubxXsv32UKaJuq6abL-CxOA1AQrXBTthfc7meCPQ_3VAHABFhBBMb4AwsdWhhDFYhAa97dabo9sy-kkAyCBx3YsP2CBbM5AvlJg0dmooR5-sSR-7ohbrs0XnDFE-gZ9uhBJ47GKVIFTCd3KGTsPCDKIQD8_AZYMJDy5sl2yeDVRCPSZ6FSSoalLBTJglOI-N5yKvWIgHsexr3VfhPLrgjuJbi4_T-SyA&s=https%3A%2F%2Fsp.invalid%2Fpdp&k=fak1_YajPmse-rD_CweKLykl4Y8q0M5dAFbeQFYEbcxFpvBs"
+      }
+    ]
+  },
+  {
+    "title": "A private upload's Share link, from a session key",
+    "about": "An upload in group team/alice, shared by a session key: its Grant for group team, then a piece claim it delegates to the link's Access key (two links). keysmith verifies a chain that narrows a group to a piece only with the piece's labels, so Danger mode opens it unverified and says so.",
+    "items": [
+      {
+        "label": "Share link",
+        "text": "https://viewer.invalid/#v1/bafkreieaxcp57yn4w7tg2cqxabzlnzna6w4h5oml4vnbycw6sazqbzexyy&d=gwKCqwACAWpncm91cDp0ZWFtAlSBE3vrm8V7L99lCmibqummy_gsTgNQEK1wU7YX3O5ngj0P91QBwARUyWrmKOYMlTPLYrelay_zY4WsJREFAQYaAATLLwdQiEyU6FHmog_JkdUBI1-E1whYQbWAVJd9sGxFR_EyDzqtNtHqSYGTyRnmeM8v_O4T6D1oE__C8P5JphZiAlgP5HaX4n6T6W7PEhGI8a4bHBP89swbClAWbZYbQEmsSzr8OEEuSs8HCxr0hlcApwACAXgocGllY2U6MHg1MzFhZmMyMGY2ZTY5YmYxNjViNWMxOTVjNmZhYTM2YgRUrewONDQ8syS6WcY5bF9fRMBrg6wFAAdQ5fOe7IY5v4i88avKe_g0QwhYQVeLwAJPKQqYkqRhOM3qej4mRPNpAd6Et4Th699Y1fkXIS0ee31BoQjGP7cY5j6nNgOM0f8nOOH2PLrkU80C2gcbCVgoAVWRICOEAwXQpa_3RGEr9ibc3eCepzxF_7QHoTT6KzAyjVM2UVTFO1jbpwACAXgocGllY2U6MHg1MzFhZmMyMGY2ZTY5YmYxNjViNWMxOTVjNmZhYTM2YgJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEWEEExzDwWLELDpVO4m6jRM2x5rbba7cHNfmghc7tNLBtU7kfslUODaBhMX-iaOD-NE6FraPN-dQt9b62hkHWVzEQSQVMM1gJVJ6Wbe8V8KY2Blgwyx0KDZ-Nt7hntbu7e4vE7NhikMojwOud3cac2lNtKJ75N5Bb8hZNDg554VIPorMt&s=https%3A%2F%2Fsp.invalid%2Fpdp&k=fak1_YOyOyVDQ9W1OMvyY6gdIMiMCu9lfuksxZ0HgKtyW9Q8"
+      }
+    ]
+  },
+  {
+    "title": "A foc_grant request URL",
+    "about": "The query form of an Authorization header, as the viewer fetches a private upload: the session key's grant chain and its request for the upload's piece, as Curio's gate reads them. This one has long expired.",
+    "items": [
+      {
+        "label": "Request URL",
+        "text": "https://sp.invalid/pdp/download/bafkzcibdtibqlxlc5hvlxoqrkodtcqqsqzyvyrvvnbzzpocpmjfs3whivq5jvcif?foc_grant=gwKBqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVLx_MvxQN3Q3bDR_Pe5OebpbfUFJBQAGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEF8sxgn3CH5GolrKEUMnWmctVWr0YbrdGrnkyO6zhiJsUji4Sm2r6PaBRxly3yv33ygO4kNO5L8Exzr4mDvDfEqGwpQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAKMAWCgBVZEgI5oDBd1i6eq7uhFThzFCEoZxXEa1aHOXuE9iSy3Y6Kw6mokFARpq_k6SAlhBqz_MW5gY5rbEwXR4NnE69d4B8mSsD1UtwerLcPoKTlc2QpBWShZv1iBUftOiUiiTgal-gx9JcNntRtVLZfdwjBs"
       }
     ]
   }

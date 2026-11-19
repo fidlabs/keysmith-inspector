@@ -17,7 +17,7 @@ import {
 import * as fee from 'filecoin-encryption-envelope'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import SAMPLES from '../samples.json' with { type: 'json' }
-import { envelopeInCar, inspectBytes } from './describe.ts'
+import { envelopeInCar, inspectBytes, openWithKey } from './describe.ts'
 import { parseText } from './input.ts'
 
 // filecoin-pin's golden Grant (Anvil keys, keysmith format 2), and the FOC-Grant header of Example 1 in keysmith's claim vectors.
@@ -272,4 +272,33 @@ test('a claim chain or request with a nonsense expiry still inspects', () => {
     const view = inspectBytes(hex(bytes))
     assert.ok(view.fields.some((f) => f.value?.includes('not a valid time')))
   }
+})
+
+test("a private upload's share links, and the foc_grant request URL", async () => {
+  const [byOwner, bySession, request] = SAMPLES.slice(8) as typeof SAMPLES
+  for (const [sample, links, unverified] of [
+    [byOwner, 1, false],
+    [bySession, 2, true],
+  ] as const) {
+    const link = parseText(sample!.items[0]!.text, { danger: true })
+    assert.ok(link.ok && link.key, sample!.title)
+    assert.ok(link.notes.some((note) => note.includes('private upload') && note.includes('Delivery')))
+    assert.ok(link.notes.some((note) => note.includes('https://sp.invalid/pdp')))
+    const view = inspectBytes(link.bytes)
+    assert.ok(view.kind === 'grant' && view.chain?.links.length === links && view.chain.links.at(-1)?.pieceCid)
+    const opened = await openWithKey(link.key, link.bytes, true)
+    assert.match(opened.node, /^piece:0x/)
+    assert.equal(opened.unverified === true, unverified)
+    // Another key is not the chain's bearer, verified or not
+    await assert.rejects(openWithKey(`0x${'ab'.repeat(32)}`, link.bytes, true), /another bearer/)
+  }
+
+  const url = parsed(request!.items[0]!.text)
+  assert.equal(url.source, 'foc_grant query')
+  assert.ok(url.notes.some((note) => note.includes('/download/')))
+  assert.equal(inspectBytes(url.bytes).kind, 'presentation')
+  assert.equal(parsed(`foc_grant=${request!.items[0]!.text.split('foc_grant=')[1]}`).source, 'foc_grant query')
+
+  const badProvider = byOwner!.items[0]!.text.replace(/&s=[^&]*/, `&s=${encodeURIComponent('javascript:alert(1)')}`)
+  assert.equal(parseText(badProvider, { danger: true }).ok, false)
 })
