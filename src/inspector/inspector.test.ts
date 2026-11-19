@@ -283,7 +283,7 @@ test("a private upload's share links, and the foc_grant request URL", async () =
     const link = parseText(sample!.items[0]!.text, { danger: true })
     assert.ok(link.ok && link.key, sample!.title)
     assert.ok(link.notes.some((note) => note.includes('private upload') && note.includes('Delivery')))
-    assert.ok(link.notes.some((note) => note.includes('https://sp.invalid/pdp')))
+    assert.ok(link.notes.includes('Providers that hold the piece (s=): https://sp.invalid/pdp.'))
     const view = inspectBytes(link.bytes)
     assert.ok(view.kind === 'grant' && view.chain?.links.length === links && view.chain.links.at(-1)?.pieceCid)
     const opened = await openWithKey(link.key, link.bytes, true)
