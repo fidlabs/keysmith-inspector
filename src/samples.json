@@ -4,8 +4,8 @@
     "about": "What `filecoin-pin add --encrypt` stores, and what a gateway serves for its root CID: an outer CAR holding encrypted.fee, whose ciphertext is the inner CAR of hello.txt. The inspector finds the envelope inside the CAR.",
     "items": [
       {
-        "label": "Outer CAR, base64 (root bafkreihfcljxujvrmuudka3obdvdcc7ixukipkqtmv5oysqe5bkjppmiam)",
-        "text": "OqJlcm9vdHOB2CpYJQABVRIg5RLTeiaxZSg1A24I6jEL6L0Uh6oTZXrsSgToVJe9iANndmVyc2lvbgGfBAFVEiDlEtN6JrFlKDUDbgjqMQvovRSHqhNleuxKBOhUl72IA9CDWPynAToAAQEAA3gYYXBwbGljYXRpb24vdm5kLmlwbGQuY2FyBUetOjMNAphSEHgoYXBwbGljYXRpb24vdm5kLmZpbGVjb2luLWVuY3J5cHRpb24rY29zZSAaAAQAADoAAQD8GOk6AAEA/6RlZm9jL3YBZmZvYy9rc3giMHhlMzk0NDJhZTU5ZmI3ZmU0YzNlMDQwMGQyMTNiMDUzMGdmb2Mvb3dueCoweDg1ODkwYTExMzNjNDYwZjM3NTRjM2RjZjkwZWM5ZTUxMDFhN2NmNTFoZm9jL3NhbHR4IjB4NzkwZjI3MjNiNjQ1MTJkYzM0ZDI0ZmM4Y2YzMmU4YWag9p/1NHKFLCG2rJYM6RJFpmshi6cWSHvBlM5DJXdIfkVeXuePskSW5Kzn4vrW6gZpiCr9y2ywcVr5WlNiL44XpUjTBASTNxTtjn4tjR+yYLMkPIyveNG3hnKEuvjKE77/1Km42OUiYP8sdYZcMF85DnB0r21aUKASEC5Wq94fHH67wHREPbwqGrRRTwbF3CW/4YCJqEsatt0z72UNF51eXdjmoKeTwjSxoJisa+aScjGVoZiJVGzRww+Mg1IgANuZ3o9xSm/ZAHeLmrJoyK0YP+/PBYQ1rJ7fBNNhaiY0F48cG9K5ys0hCnTWvkLZ3Hq4Hg2lrQx+JCUy/Q==",
+        "label": "Outer CAR, base64 (root bafkreifs6zpqdtzq3xu3c52rlmelpbepb2o25ptrmyboqph5xvwcud3vpe)",
+        "text": "OqJlcm9vdHOB2CpYJQABVRIgsvZfAc8w3emxd1FbCLeEjw6drr5xZgLoPP29bCoPdXlndmVyc2lvbgGhBAFVEiCy9l8BzzDd6bF3UVsIt4SPDp2uvnFmAug8/b1sKg91edCDWP6nAToAAQEAA3gYYXBwbGljYXRpb24vdm5kLmlwbGQuY2FyBUeinIr18u/JEHgoYXBwbGljYXRpb24vdm5kLmZpbGVjb2luLWVuY3J5cHRpb24rY29zZSAaAAQAADoAAQD8GOk6AAEA/6RlZm9jL3YCZ2ZvYy9vd254KjB4ODExMzdiZWI5YmM1N2IyZmRmNjUwYTY4OWJhYWU5YTZjYmY4MmM0ZWhmb2MvZ2tpZHgiMHgxMGFkNzA1M2I2MTdkY2VlNjc4MjNkMGZmNzU0MDFjMGhmb2Mvc2FsdHgiMHhkNTc4NTdhZTE3NjgwYWVhNGYwOGQ2MDY4ZWVlOGQyM6D2UOo6+aqQqvyhup2P+r4ldpZPuKvuBi6YQvCmkBRIUX+Reo0+gSukqr56ZCYcX8h+LPecEPf3zQcpN3kTkgXjBrS32hRFKkNM3Anw7OvgKqEyOpikVOqIf1cVFTPfI1da/BQoFoR3oLQH7KJH/5MEwD3sii41fFs6rYu5mFsesmQ9u8xK33mAwwZGJQuH3sDMVGK07MPFnrnzJd5Nyhr4Ec+9cAqlIfl5PNdXYT8pzA5eg6j++c4Chr6dyV9H2dyZgactraFMbOG+XD6//Cjpt0CKpmpyp0tCHTkY0j6KD76nCMG8ByMgHm2F7WVvCGjfVSbTY10Jytj8",
         "file": "upload.car"
       }
     ]
@@ -16,7 +16,7 @@
     "items": [
       {
         "label": "Share link",
-        "text": "https://viewer.invalid/#v1/bafkreihfcljxujvrmuudka3obdvdcc7ixukipkqtmv5oysqe5bkjppmiam&d=pwABAXgocGllY2U6MHg3OTBmMjcyM2I2NDUxMmRjMzRkMjRmYzhjZjMyZThhZgJUhYkKETPEYPN1TD3PkOyeUQGnz1EDUOOUQq5Z-3_kw-BADSE7BTAEWEEEsb0U_olKMSQ0Vi2BJjttAsuIxQfEOpEcPxPKZmaRRCE6uaNpUsj3NMvZOZHc2ouLrU4ODsoyuzA4XC1jX7HJ0QVMCFc0h6sZoYT9Q0PHBlgwqV3vJp5iF0vWRgGvIpKZRE-fdlimqWetdK3q901m_asioI0SFVwcTJ4Lf8EDrmaa&k=fak1_F1ENkY2hXj7RzSO_C8BT7ijYcbetQHp38C_R8HqwV4M"
+        "text": "https://viewer.invalid/#v1/bafkreifs6zpqdtzq3xu3c52rlmelpbepb2o25ptrmyboqph5xvwcud3vpe&d=pwACAXgocGllY2U6MHhkNTc4NTdhZTE3NjgwYWVhNGYwOGQ2MDY4ZWVlOGQyMwJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEWEEEW3s2K6-2TdfFIX2gvP4iBnvmI1nPvB4CInH1Rl6nVaYm8fFM8Lcgv8-vRJjkGZC134e6s1U1Npy8wLxsmTHU9QVM6BHA9YXFiK2Xjmh8BlgwQ1zC8oEr6wTSeUrY4coSb5wQotuNwbu2CgvF1bY8NK2gR15Ktd-MusRkPh6IcrQt&k=fak1_WvxF4gpPQrPkhiQmtybSx0Zgn9DrkAVNQEGlshH8d6c"
       }
     ]
   },
@@ -26,73 +26,103 @@
     "items": [
       {
         "label": "Share link",
-        "text": "https://viewer.invalid/#v1/bafkreihfcljxujvrmuudka3obdvdcc7ixukipkqtmv5oysqe5bkjppmiam&d=pwABAXgocGllY2U6MHg3OTBmMjcyM2I2NDUxMmRjMzRkMjRmYzhjZjMyZThhZgJUhYkKETPEYPN1TD3PkOyeUQGnz1EDUOOUQq5Z-3_kw-BADSE7BTAEWEEEIbYryNYMwS_8cI_LTSa_OG7VHCKNsveMJ1EzkgU4w8mxy-2QWS7Xahazi4cBvxjavy6huf6uUYPxEs5uptRe4wVMc9UyHObsDlr52Z7tBlgwlwVorQ79ThKueCu1Bltv-LeKfDGaTEpIqJXmuXNz_R1BXb6a2IorMe4fE-_PGCAC"
+        "text": "https://viewer.invalid/#v1/bafkreifs6zpqdtzq3xu3c52rlmelpbepb2o25ptrmyboqph5xvwcud3vpe&d=pwACAXgocGllY2U6MHhkNTc4NTdhZTE3NjgwYWVhNGYwOGQ2MDY4ZWVlOGQyMwJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEWEEE-yS5MPN_I0K9ngvs_2lZkighnCMU5PjGfws7K1BN4r5oKXqJTxmyinjNVrzaJFtqOLk3dGONrokzQW-uqrz7hQVMS5YWfkYdgWZ6PENrBlgwhxC5GVdcU9Q_tbKiJ22Voh1VhSTSnitPuYI36T5OBA3P9w1o11PLdBOGvFv1Xakc"
       },
       {
         "label": "Access key",
-        "text": "fak1_bf0YsYhLf1WesW25TdB5umGsk96BGV5eQRky68DO_o0"
+        "text": "fak1_x3bVOibzx4t4GrrG9OWjVGrvgrVHCwR390vtysLgxDc"
       }
     ]
   },
   {
-    "title": "A Grant for the whole keyspace (kk)",
-    "about": "One link from the owner, as the console grants a session key at login: node \"keyspace\", no further delegation.",
+    "title": "A Grant for the whole group key",
+    "about": "One link from the owner, as the console grants a session key at login: node \"groupKey\", no further delegation.",
     "items": [
       {
         "label": "Grant",
-        "text": "fgr1_gwGBqwABAWhrZXlzcGFjZQJUhYkKETPEYPN1TD3PkOyeUQGnz1EDUOOUQq5Z-3_kw-BADSE7BTAEVMUMeK4U1o9vWs5o_nglEq9oi9UHBQAGGgAEyy8HUGaNiW1tMurGzHKm3ZceOkgIWEG_KMcwDB9LnuwbrPTyjlRDsGFjbrUSQke_Dy5XgDxJwmnNK7YM23iMSAgBEf2RWhLAPYKUoA7n6Gua07EKWWVVGwpQZo2JbW0y6sbMcqbdlx46SAsa9IZXAFi6pwABAWhrZXlzcGFjZQJUhYkKETPEYPN1TD3PkOyeUQGnz1EDUOOUQq5Z-3_kw-BADSE7BTAEWEEEl9PNHdKk_A63hS5gY_aUE13s3uzA6pLA_uOaRQcqf4ldIc1YpJsaxKKVu0trLCSZ-MtxIrJG_VoJcWmM00W4cQVMZgnJiTmdqDsK0sFOBlgwB5p-KYNQsxAxjIptqdiPgTCWBGZe8c0iRWnTz8PsJhGzUSUpdaIXl-K6YwwTh2er"
+        "text": "fgr1_gwKBqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVLx_MvxQN3Q3bDR_Pe5OebpbfUFJBQAGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEF8sxgn3CH5GolrKEUMnWmctVWr0YbrdGrnkyO6zhiJsUji4Sm2r6PaBRxly3yv33ygO4kNO5L8Exzr4mDvDfEqGwpQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAFi6pwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEWEEECztDFIla7KKeVD4a8OIwH4aRydnBFotuz9tLewOQoaIbkT0iKoc31cgrnUolt2Ecnwu-goAQbFW_JRt_zIOLGwVM6ujo4sNd5qfqH7QcBlgwbW0OWCqDqcNfwhmdXe6Qvi6m-k6E4rL8BxGQU7Ef9tnPUvyIkV1129wefdp_JJr2"
       },
       {
         "label": "Session key (Danger mode, key box)",
-        "text": "SESSION_KEY=0xc3875166889a9b3e9a5201c22dbb6ab417c6e24e3f1d9c2a82dbb759d351dff3"
+        "text": "SESSION_KEY=0x23a0f165aee74479b2ee275c9b5c7d0b5ecc711e6677833c988c933d94f964cf"
       }
     ]
   },
   {
-    "title": "A Grant for a scope",
-    "about": "One link from the owner for scope \"team\" only: it opens uploads in team and below, not the rest of the keyspace.",
+    "title": "A Grant for a group",
+    "about": "One link from the owner for group \"team\" only: it opens uploads in team and below, not the rest of the group key.",
     "items": [
       {
         "label": "Grant",
-        "text": "fgr1_gwGBqwABAWpzY29wZTp0ZWFtAlSFiQoRM8Rg83VMPc-Q7J5RAafPUQNQ45RCrln7f-TD4EANITsFMARUzlerAnfX1CeX62kLaLw1EYJLHRsFAAYaAATLLwdQHH90eKAzxGvFfy5pRFV-eAhYQeAlMsCG-XzCG0nQ3fsNxGwwXXI7fdsuoEUdE1TRI00PXU8LlS0-ryFCZzHNH8PwIiQ5Fw4EJGfKtl0YMtakLMccClBmjYltbTLqxsxypt2XHjpICxr0hlcAWLynAAEBanNjb3BlOnRlYW0CVIWJChEzxGDzdUw9z5DsnlEBp89RA1DjlEKuWft_5MPgQA0hOwUwBFhBBOFQxROMftzbzoOFapUO_Y46M0o7ZnR8zmFC_nsoXHlfwtVIlboeBnkyLxeOODBmGzm3d3yZbrR7412qR7xVHEUFTEzVFBJE_N_KnG-1oAZYMP0Ll1WgWNlvftgNKOBlXijkc3zZJGYa7RoW-sJkYCiZCwh7jONUUbS8eu0sKCDQ4A"
+        "text": "fgr1_gwKBqwACAWpncm91cDp0ZWFtAlSBE3vrm8V7L99lCmibqummy_gsTgNQEK1wU7YX3O5ngj0P91QBwARUGrLRNt1fIwWhShI5Mx9lZLVzXJkFAAYaAATLLwdQiEyU6FHmog_JkdUBI1-E1whYQTe5Mm5QhHOkTPqqfkRO5TL4SO2C8NhzY0Znvg9DK36_ZhiiNEaANrZXaCnwFWodf248hRP-WnvzQJP0WmhknggcClAWbZYbQEmsSzr8OEEuSs8HCxr0hlcAWLynAAIBamdyb3VwOnRlYW0CVIETe-ubxXsv32UKaJuq6abL-CxOA1AQrXBTthfc7meCPQ_3VAHABFhBBBD1c6UNHeEOXgga9PjVYIQJq95Y9Rz_a16NEjbJrSHyg4OkxgMstHsDortGfeYqbWGlWwBgerc-mur3UEK_BfEFTFbjzbjIQkFCPkLAegZYMMTLzByWFx5-i5YNOXb6RVUhOdkxtYPUcOH-PBmGugh4VbeZmnJFGWuHdXXGAydZaA"
       },
       {
         "label": "Session key (Danger mode, key box)",
-        "text": "SESSION_KEY=0x29bb67ab386bccf952e468f431ccfb0c8783b63e6a216dd877fe173893e08640"
+        "text": "SESSION_KEY=0x12666cc4ccf87d66a30fe60d2e78ae79308aae844fc4e14f89ddd7f95cb7cafc"
       }
     ]
   },
   {
     "title": "A nested claim chain",
-    "about": "Two links: the owner grants a session key the keyspace with one level of delegation, and the session key narrows it to scope \"team/alice\" for an agent.",
+    "about": "Two links: the owner grants a session key the group key with one level of delegation, and the session key narrows it to group \"team/alice\" for an agent.",
     "items": [
       {
         "label": "Grant",
-        "text": "fgr1_gwGCqwABAWhrZXlzcGFjZQJUhYkKETPEYPN1TD3PkOyeUQGnz1EDUOOUQq5Z-3_kw-BADSE7BTAEVNBilgGNUNVjI90qtorcjFfoGnKGBQEGGgAEyy8HUGaNiW1tMurGzHKm3ZceOkgIWEFkGwo3YKT3QkJmCdhDCC3q9XQO53tPbBIyuVLbgSV0KSXXf7A2DA2C081E_iCgHBVI9oxhJf2giU_3DzukE7XkGwpQZo2JbW0y6sbMcqbdlx46SAsa9IZXAKYAAQFwc2NvcGU6dGVhbS9hbGljZQRU93PE5iE516oXI6Om8e-9xRgHLxsFAAdQixmi3P0vrW7NAHj05MVTDghYQVFhQiKapJaZmI6009YB93GLZF46v0XSzZ7tMfdxS2YuFyDmDdNgbumbNRRySJ9q1SLVQ0ZNSplmqxtFzP17gIobWMKnAAEBcHNjb3BlOnRlYW0vYWxpY2UCVIWJChEzxGDzdUw9z5DsnlEBp89RA1DjlEKuWft_5MPgQA0hOwUwBFhBBLRQrqHj-28HND6EzRt-8Ivgvm13h-_scxMjdY6hnvzRq2KYu6ODrH75yp1SpaML8kOZzne2AypZOSt8PWg45WYFTGig8ao8H7RwMtvcIgZYMErsqk58-SCoS_C7QGS7txI033sfiLBR6gmxKHxUbRXW7Y3UlMfNQJMNPKJ5kcGAcg"
+        "text": "fgr1_gwKCqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVGdqAc1zmAzOhH0WHU27JEwIqW7iBQEGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEGuslndM88GGlSz7gINzBaE50v2hmX7oz042mAjAjWNtAjS9Hok196bcnHNCEvqegYM2rny8DtQimo4DD7AXEaLHApQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAKYAAgFwZ3JvdXA6dGVhbS9hbGljZQRUcVu2Tg120VX90nlQPXXN7vojxrYFAAdQdkVOak4FCTJSLC9AbWTQMwhYQeBlr5psdjk40w2s-ijDiTGGxcstfaRcssYAAvf4gYBjbYIWVVPEyB869NF3MIGHZDlv1BVnDqJzYoQiwY3RrqsbWMKnAAIBcGdyb3VwOnRlYW0vYWxpY2UCVIETe-ubxXsv32UKaJuq6abL-CxOA1AQrXBTthfc7meCPQ_3VAHABFhBBEkhgymTKfy0sl8Di0RA-BiXwIcsIkJXq-uA2BTOFQAnc7gpGRwGxD2VkWQ-wmE8KpAI8MKQw54YXQgfbbWeBFgFTLCrmHZcUu9DHhVBTwZYMOZ51uSYh_uWbqXMjCgdEay19HSfgrvKBRwnGGj3tAefJ9w0WBMWHScir_yReYeaqA"
       },
       {
         "label": "Agent's key (Danger mode, key box)",
-        "text": "SESSION_KEY=0xdb36001a8865cc3a56a8cc91ed045be2bd673dd499ac295cd9238ff92abeb1ab"
+        "text": "SESSION_KEY=0x10685987b334ab06c4e75ca397372702f0397c2881248cb160b01b0027040e54"
       }
     ]
   },
   {
     "title": "An Authorization header for a gated fetch",
-    "about": "What a client sends Curio to fetch the upload above: the keyspace Grant's claim chain, and a request signed by its session key naming the upload's piece. A real header is good for 4 minutes; this one has long expired.",
+    "about": "What a client sends Curio to fetch the upload above: the group key Grant's claim chain, and a request signed by its session key naming the upload's piece. A real header is good for 4 minutes; this one has long expired.",
     "items": [
       {
         "label": "Authorization header",
-        "text": "Authorization: FOC-Grant gwGBqwABAWhrZXlzcGFjZQJUhYkKETPEYPN1TD3PkOyeUQGnz1EDUOOUQq5Z-3_kw-BADSE7BTAEVMUMeK4U1o9vWs5o_nglEq9oi9UHBQAGGgAEyy8HUGaNiW1tMurGzHKm3ZceOkgIWEG_KMcwDB9LnuwbrPTyjlRDsGFjbrUSQke_Dy5XgDxJwmnNK7YM23iMSAgBEf2RWhLAPYKUoA7n6Gua07EKWWVVGwpQZo2JbW0y6sbMcqbdlx46SAsa9IZXAKMAWCgBVZEgI5wDBW9J_eLLiMEfeMTzuB8XdKgffrEcltIBmEY6KDlbOyYAARpq7dyvAlhBHJAUAYDOUc0Epd7tUhETolNvd4NqxoNIttePsYLg7Vxg2gZEo1NGaH_xpxVLPH3CThv7sisqiwrVmaGPuDeBuRw"
+        "text": "Authorization: FOC-Grant gwKBqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVLx_MvxQN3Q3bDR_Pe5OebpbfUFJBQAGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEF8sxgn3CH5GolrKEUMnWmctVWr0YbrdGrnkyO6zhiJsUji4Sm2r6PaBRxly3yv33ygO4kNO5L8Exzr4mDvDfEqGwpQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAKMAWCgBVZEgI5oDBd1i6eq7uhFThzFCEoZxXEa1aHOXuE9iSy3Y6Kw6mokFARpq_k6SAlhBqz_MW5gY5rbEwXR4NnE69d4B8mSsD1UtwerLcPoKTlc2QpBWShZv1iBUftOiUiiTgal-gx9JcNntRtVLZfdwjBs"
       }
     ]
   },
   {
     "title": "An Authorization header from a nested claim chain",
-    "about": "The nested chain above, presented: the owner gives a session key the keyspace with one level of delegation, that key narrows it to scope \"team/alice\" for an agent, and the agent signs the request for a piece in team/alice. A real header is good for 4 minutes; this one has long expired.",
+    "about": "The nested chain above, presented: the owner gives a session key the group key with one level of delegation, that key narrows it to group \"team/alice\" for an agent, and the agent signs the request for a piece in team/alice. A real header is good for 4 minutes; this one has long expired.",
     "items": [
       {
         "label": "Authorization header",
-        "text": "Authorization: FOC-Grant gwGCqwABAWhrZXlzcGFjZQJUhYkKETPEYPN1TD3PkOyeUQGnz1EDUOOUQq5Z-3_kw-BADSE7BTAEVNBilgGNUNVjI90qtorcjFfoGnKGBQEGGgAEyy8HUGaNiW1tMurGzHKm3ZceOkgIWEFkGwo3YKT3QkJmCdhDCC3q9XQO53tPbBIyuVLbgSV0KSXXf7A2DA2C081E_iCgHBVI9oxhJf2giU_3DzukE7XkGwpQZo2JbW0y6sbMcqbdlx46SAsa9IZXAKYAAQFwc2NvcGU6dGVhbS9hbGljZQRU93PE5iE516oXI6Om8e-9xRgHLxsFAAdQixmi3P0vrW7NAHj05MVTDghYQVFhQiKapJaZmI6009YB93GLZF46v0XSzZ7tMfdxS2YuFyDmDdNgbumbNRRySJ9q1SLVQ0ZNSplmqxtFzP17gIobowBYKAFVkSAjhgMF0WwsExauDs7z3GQ2zKhTT19dCBsr6-mkp_hoDvAKKj8BGmrt3K8CWEHFziVl6x4JPny5rhGq-4pF1J0A8tREyMPOWeEA5CI1_SJhjir4CjxBLL3F8XLH8M514Sg_TBapYEYktfYj7MdUHA"
+        "text": "Authorization: FOC-Grant gwKCqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVGdqAc1zmAzOhH0WHU27JEwIqW7iBQEGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEGuslndM88GGlSz7gINzBaE50v2hmX7oz042mAjAjWNtAjS9Hok196bcnHNCEvqegYM2rny8DtQimo4DD7AXEaLHApQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAKYAAgFwZ3JvdXA6dGVhbS9hbGljZQRUcVu2Tg120VX90nlQPXXN7vojxrYFAAdQdkVOak4FCTJSLC9AbWTQMwhYQeBlr5psdjk40w2s-ijDiTGGxcstfaRcssYAAvf4gYBjbYIWVVPEyB869NF3MIGHZDlv1BVnDqJzYoQiwY3RrqsbowBYKAFVkSAjhAMF4u0xFBPaOccMQrTGCoV7NNyQQ0dZVyYgN7wAZKv4Vj8BGmr-TpICWEE2T2jNysqqk_qF4Kt3_u55ASdhQ8IIHYhTdGkxhfKaFia0itwA1qsnFgNyoZIE0nQ_--_VTKP37qLtWJppVKubHA"
+      }
+    ]
+  },
+  {
+    "title": "A private upload's Share link, from the owner",
+    "about": "An open link to a private upload (add --private): d= is a Delivery, one root claim from the owner for this piece, borne by the link's Access key, with the piece CID as its locator; s= names the providers. Turn on Danger mode to open it.",
+    "items": [
+      {
+        "label": "Share link",
+        "text": "https://viewer.invalid/#v1/bafkreifs6zpqdtzq3xu3c52rlmelpbepb2o25ptrmyboqph5xvwcud3vpe&d=gwKBrAACAXgocGllY2U6MHhkNTc4NTdhZTE3NjgwYWVhNGYwOGQ2MDY4ZWVlOGQyMwJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVLee-bUQMRpes-iRumdkPykTnx1aBQAGGgAEyy8HUIgXPgOnauzUiZIlb1BXZ3AIWEGxy3Jds_R_hOt8W_oIQmEYh4-MfbjADFHSXO3kohmbgG5GvzxtCqT4MkIzbPQm7l8cqdAsFK8vylZ9IFdGGz7aHAlYKAFVkSAjmgMF3WLp6ru6EVOHMUIShnFcRrVoc5e4T2JLLdjorDqaiQUKUBZtlhtASaxLOvw4QS5KzwcLGmsl2qJY26cAAgF4KHBpZWNlOjB4ZDU3ODU3YWUxNzY4MGFlYTRmMDhkNjA2OGVlZThkMjMCVIETe-ubxXsv32UKaJuq6abL-CxOA1AQrXBTthfc7meCPQ_3VAHABFhBBMb4AwsdWhhDFYhAa97dabo9sy-kkAyCBx3YsP2CBbM5AvlJg0dmooR5-sSR-7ohbrs0XnDFE-gZ9uhBJ47GKVIFTCd3KGTsPCDKIQD8_AZYMJDy5sl2yeDVRCPSZ6FSSoalLBTJglOI-N5yKvWIgHsexr3VfhPLrgjuJbi4_T-SyA&s=https%3A%2F%2Fsp.invalid%2Fpdp&k=fak1_YajPmse-rD_CweKLykl4Y8q0M5dAFbeQFYEbcxFpvBs"
+      }
+    ]
+  },
+  {
+    "title": "A private upload's Share link, from a session key",
+    "about": "An upload in group team/alice, shared by a session key: its Grant for group team, then a piece claim it delegates to the link's Access key (two links). keysmith verifies a chain that narrows a group to a piece only with the piece's labels, so Danger mode opens it unverified and says so.",
+    "items": [
+      {
+        "label": "Share link",
+        "text": "https://viewer.invalid/#v1/bafkreieaxcp57yn4w7tg2cqxabzlnzna6w4h5oml4vnbycw6sazqbzexyy&d=gwKCqwACAWpncm91cDp0ZWFtAlSBE3vrm8V7L99lCmibqummy_gsTgNQEK1wU7YX3O5ngj0P91QBwARUyWrmKOYMlTPLYrelay_zY4WsJREFAQYaAATLLwdQiEyU6FHmog_JkdUBI1-E1whYQbWAVJd9sGxFR_EyDzqtNtHqSYGTyRnmeM8v_O4T6D1oE__C8P5JphZiAlgP5HaX4n6T6W7PEhGI8a4bHBP89swbClAWbZYbQEmsSzr8OEEuSs8HCxr0hlcApwACAXgocGllY2U6MHg1MzFhZmMyMGY2ZTY5YmYxNjViNWMxOTVjNmZhYTM2YgRUrewONDQ8syS6WcY5bF9fRMBrg6wFAAdQ5fOe7IY5v4i88avKe_g0QwhYQVeLwAJPKQqYkqRhOM3qej4mRPNpAd6Et4Th699Y1fkXIS0ee31BoQjGP7cY5j6nNgOM0f8nOOH2PLrkU80C2gcbCVgoAVWRICOEAwXQpa_3RGEr9ibc3eCepzxF_7QHoTT6KzAyjVM2UVTFO1jbpwACAXgocGllY2U6MHg1MzFhZmMyMGY2ZTY5YmYxNjViNWMxOTVjNmZhYTM2YgJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEWEEExzDwWLELDpVO4m6jRM2x5rbba7cHNfmghc7tNLBtU7kfslUODaBhMX-iaOD-NE6FraPN-dQt9b62hkHWVzEQSQVMM1gJVJ6Wbe8V8KY2Blgwyx0KDZ-Nt7hntbu7e4vE7NhikMojwOud3cac2lNtKJ75N5Bb8hZNDg554VIPorMt&s=https%3A%2F%2Fsp.invalid%2Fpdp&k=fak1_YOyOyVDQ9W1OMvyY6gdIMiMCu9lfuksxZ0HgKtyW9Q8"
+      }
+    ]
+  },
+  {
+    "title": "A foc_grant request URL",
+    "about": "The query form of an Authorization header, as the viewer fetches a private upload: the session key's grant chain and its request for the upload's piece, as Curio's gate reads them. This one has long expired.",
+    "items": [
+      {
+        "label": "Request URL",
+        "text": "https://sp.invalid/pdp/download/bafkzcibdtibqlxlc5hvlxoqrkodtcqqsqzyvyrvvnbzzpocpmjfs3whivq5jvcif?foc_grant=gwKBqwACAWhncm91cEtleQJUgRN765vFey_fZQpom6rppsv4LE4DUBCtcFO2F9zuZ4I9D_dUAcAEVLx_MvxQN3Q3bDR_Pe5OebpbfUFJBQAGGgAEyy8HUBZtlhtASaxLOvw4QS5KzwcIWEF8sxgn3CH5GolrKEUMnWmctVWr0YbrdGrnkyO6zhiJsUji4Sm2r6PaBRxly3yv33ygO4kNO5L8Exzr4mDvDfEqGwpQFm2WG0BJrEs6_DhBLkrPBwsa9IZXAKMAWCgBVZEgI5oDBd1i6eq7uhFThzFCEoZxXEa1aHOXuE9iSy3Y6Kw6mokFARpq_k6SAlhBqz_MW5gY5rbEwXR4NnE69d4B8mSsD1UtwerLcPoKTlc2QpBWShZv1iBUftOiUiiTgal-gx9JcNntRtVLZfdwjBs"
       }
     ]
   }

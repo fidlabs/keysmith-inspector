@@ -17,14 +17,14 @@ import {
 import * as fee from 'filecoin-encryption-envelope'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import SAMPLES from '../samples.json' with { type: 'json' }
-import { envelopeInCar, inspectBytes } from './describe.ts'
+import { envelopeInCar, inspectBytes, openWithKey } from './describe.ts'
 import { parseText } from './input.ts'
 
-// filecoin-pin#788's golden Grant (Anvil keys), and the FOC-Grant header of Example 1 in keysmith's claim vectors.
+// filecoin-pin's golden Grant (Anvil keys, keysmith format 2), and the FOC-Grant header of Example 1 in keysmith's claim vectors.
 const GRANT =
-  'fgr1_gwGBqwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUALKCM9-AiLIQyrcFZIyt-sEVDxEzd22qQD6K1hd0pngPRL6QpO8BQAGGgAEyy8HUGoMg9KNYHqOiNxnkftJ1-IIWEGdCbSL16RMCZ2Hjsznju8VSTRpq-2RHLu7I-Bporb53VomKJ-goC0IRqON69e6bUOcH7QUKmWcKFlpQI2nT5JjGwpQagyD0o1geo6I3GeR-0nX4gsa9IZXAFi6pwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUALKCM9-AiLIQyrcFZIyt-sEWEEEQ9-xkEnBkX7FqCJHDgkGNVOlDBknDtAvJ__SuOQjpQlgLGfm1EvV4j3YxrjJg33xI92pA85BM-J4cgycL0Yl1QVMYIy-eUdXcvuV3NhHBlgwikJobsjiFOwzSVnbA7-WyI7_-0AIn8UgnzuANx3YCl_SQDZrM8iUMIDuNL620d39'
+  'fgr1_gwKBqwACAWhncm91cEtleQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUALKCM9-AiLIQyrcFZIyt-sEVDxEzd22qQD6K1hd0pngPRL6QpO8BQAGGgAEyy8HUKTAK_v_zb_3Sz5mAaZ0bZwIWEFG8XomGpP0MPKlif23na1MQLEFFhipPX0GNZbtOZtVbEnsqFZxhM0Tq5a53kaP2LBSDM5ZEU3WcH3MOkQtzt5QGwpQpMAr-__Nv_dLPmYBpnRtnAsa9IZXAFi6pwACAWhncm91cEtleQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUALKCM9-AiLIQyrcFZIyt-sEWEEEBoUkIEGC2gyP3meS8N2b9UhsyBd3WReZgk7mSKPpS6C32SriAFwr42n4tCRCEkfwYwayZrzr65t4R75nm1wcuAVMtAgEssgVvy1RrhL7Blgw-shWVySbCmDnncKG_XYFLv-tFsqTcdkWlaSISB1gboMHUylMQWkyH0lKC6Lzb0Bn'
 const HEADER =
-  'Authorization: FOC-Grant gwGCqwABAWhrZXlzcGFjZQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUAARIjNEVWZ3iJmqu8zd7v8EVHCZeXDFGBLcOgEMfQG1Dg0X3HnIBQEGGgAEyy8HUGmCgHZJZQ4xHkxpr0rJBBcIWEEFITskOn04xokCHpz4cyHOnMcc0CGKBqpT3ryp8WjPaWFOYYj1dHrWTqatbUuFDLALuFTlGuuSFIdywgWZq9GRHApQaYKAdkllDjEeTGmvSskEFwsaat1GgKYAAQFyc2NvcGU6YWdlbnQtbWVtb3J5BFQ8RM3dtqkA-itYXdKZ4D0S-kKTvAUAB1DAdHzv1YTi_8bp-684aTPGCFhBmqxvu_MYJOcy9lYmAS_W2c0gKhrtvc3to2HW5G4RkDBTKSvc_Nq4ZY2qy5m53iwuNoUeHsJ2v2RarYolbQeXLRujAFgnAVWRICIzBFy7lWgxqOJH7Qb38pP63xobZGvshUKsakzSKSkTY2knARpq1Bs8AlhBdfsRhhdC-lZ0Rf9egiAE_MxWM9eOK9f939d8-BT-Qv54nZFERMIDIP_LVuiH27gHks40GlEw5xXYlBgLaLqBnhw'
+  'Authorization: FOC-Grant gwKCqwACAWhncm91cEtleQJU85_W5RqtiPb0zmq4gnJ5z_-5ImYDUAARIjNEVWZ3iJmqu8zd7v8EVHCZeXDFGBLcOgEMfQG1Dg0X3HnIBQEGGgAEyy8HUFdwiSIPY9xmK0_Epgq-G0gIWEFHODCs5W1V5ClE4k7ja5QfDDMWw0n9T-5_P7dv-sXzxymOZEybwCUM2kz2lSLbT7oUcgW8_J3Akvv55EQ4Tg51GwpQV3CJIg9j3GYrT8SmCr4bSAsaat1GgKYAAgFyZ3JvdXA6YWdlbnQtbWVtb3J5BFQ8RM3dtqkA-itYXdKZ4D0S-kKTvAUAB1C-yBeNS_TRIT4hOy1bx31OCFhB9X9fEPPE7o9HpTKteIoTaCBMzBxnbibxN-PLJfZJd-AtvOZhDZiY0yGE8PbpO98fTg4rTGbo7Cn92BPD_QUSQRujAFgnAVWRICIzBFy7lWgxqOJH7Qb38pP63xobZGvshUKsakzSKSkTY2knARpq1Bs8AlhB0OyIN8Q1LXcgik9ifXks5-FR9lktfL4AAVVB22gan6wDNYJ9imgNM0EpGuPFdQLnxUPvLrVqBg35m6BMQx0O6Bs'
 
 function parsed(text: string) {
   const result = parseText(text)
@@ -37,7 +37,7 @@ test('a Grant, with or without its session.env variable, is a delivery Keysmith 
     const view = inspectBytes(parsed(text).bytes)
     assert.equal(view.kind, 'grant')
     assert.ok(view.kind === 'grant' && view.chain && !view.strictError)
-    assert.equal(view.kind === 'grant' && view.chain?.links[0]?.node, 'keyspace')
+    assert.equal(view.kind === 'grant' && view.chain?.links[0]?.node, 'groupKey')
   }
 })
 
@@ -108,19 +108,19 @@ test('danger mode decodes keys, and opens a restricted share link with its Acces
   const owner = privateKeyToAccount(generatePrivateKey())
   const accessKey = generatePrivateKey()
   const bearer = privateKeyToAccount(accessKey)
-  const ref = { owner: owner.address, keyspace: '0x00112233445566778899aabbccddeeff' } as const
+  const ref = { owner: owner.address, groupKeyId: '0x00112233445566778899aabbccddeeff' } as const
   const { chain, nodeKey } = await rootClaim(owner, {
     ...ref,
     chainId: 314159n,
-    kk: new Uint8Array(32).fill(9),
-    node: 'keyspace',
+    groupKey: new Uint8Array(32).fill(9),
+    node: 'groupKey',
     bearer: bearer.address,
     maxDepth: 0,
     expires: 4102444800,
   })
   const delivery = encodeDelivery(
     chain,
-    await wrapTo(publicKeyOf(accessKey), nodeKey, grantDescriptor(ref, 'keyspace'))
+    await wrapTo(publicKeyOf(accessKey), nodeKey, grantDescriptor(ref, 'groupKey'))
   )
   const b64 = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64url')
   const link = `#v1/bafyroot&d=${b64(delivery)}&k=fak1_${b64(Buffer.from(accessKey.slice(2), 'hex'))}`
@@ -130,16 +130,51 @@ test('danger mode decodes keys, and opens a restricted share link with its Acces
   assert.deepEqual((await openDelivery(opened.key, opened.bytes)).key, nodeKey)
 
   // A whole session.env: refused normally; in danger mode, the grant to inspect plus the key that opens it.
-  const env = `WALLET_ADDRESS=${owner.address}\nSESSION_KEY=${accessKey}\nKEYSPACE_GRANT=fgr1_${b64(delivery)}`
+  const env = `WALLET_ADDRESS=${owner.address}\nSESSION_KEY=${accessKey}\nGROUP_KEY_GRANT=fgr1_${b64(delivery)}`
   assert.equal(parseText(env).ok, false)
   const fromEnv = parseText(env, { danger: true })
   assert.ok(fromEnv.ok && fromEnv.key === accessKey && inspectBytes(fromEnv.bytes).kind === 'grant')
 })
 
+test('several comma-separated Grants in GROUP_KEY_GRANT: one at a time, the picked one', async () => {
+  const owner = privateKeyToAccount(generatePrivateKey())
+  const sessionKey = generatePrivateKey()
+  const ref = { owner: owner.address, groupKeyId: '0x00112233445566778899aabbccddeeff' } as const
+  const grantFor = async (node: string) => {
+    const { chain, nodeKey } = await rootClaim(owner, {
+      ...ref,
+      chainId: 314159n,
+      groupKey: new Uint8Array(32).fill(9),
+      node,
+      bearer: privateKeyToAccount(sessionKey).address,
+      maxDepth: 0,
+      expires: 4102444800,
+    })
+    const delivery = encodeDelivery(
+      chain,
+      await wrapTo(publicKeyOf(sessionKey), nodeKey, grantDescriptor(ref, node as 'groupKey'))
+    )
+    return `fgr1_${Buffer.from(delivery).toString('base64url')}`
+  }
+  const line = `GROUP_KEY_GRANT=${await grantFor('group:a')},${await grantFor('group:b/c')}`
+
+  for (const [pick, node] of [
+    [0, 'group:a'],
+    [1, 'group:b/c'],
+    [9, 'group:b/c'],
+  ] as const) {
+    const parsed = parseText(line, { pick })
+    assert.ok(parsed.ok && parsed.of?.count === 2, `pick ${pick}`)
+    const view = inspectBytes(parsed.bytes)
+    assert.equal(view.kind === 'grant' && view.chain?.links[0]?.node, node)
+  }
+  assert.ok(parseText(line).ok && /Showing Grant 1/.test(String((parseText(line) as { notes: string[] }).notes)))
+})
+
 test('a FEE piece shows its Keysmith labels', async () => {
   const metadata = pieceMetadata(
-    { owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', keyspace: '0x00112233445566778899aabbccddeeff' },
-    { salt: newSalt(), scope: 'team' }
+    { owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', groupKeyId: '0x00112233445566778899aabbccddeeff' },
+    { salt: newSalt(), group: 'team' }
   )
   const plaintext = new TextEncoder().encode('hello')
   const stream = new Blob([plaintext]).stream().pipeThrough(
@@ -152,7 +187,7 @@ test('a FEE piece shows its Keysmith labels', async () => {
   const bytes = new Uint8Array(await new Response(stream).arrayBuffer())
   const view = inspectBytes(bytes)
   assert.equal(view.kind, 'piece')
-  assert.equal(view.kind === 'piece' && view.metadata?.['foc/scope'], 'team')
+  assert.equal(view.kind === 'piece' && view.metadata?.['foc/group'], 'team')
 })
 
 test('a CAR file is explained rather than misread', () => {
@@ -173,7 +208,7 @@ test('a CAR file is explained rather than misread', () => {
 })
 
 test('every sample inspects, and its keys open it', async () => {
-  // The upload: an outer CAR whose block is the FEE envelope, labelled with the owner's keyspace.
+  // The upload: an outer CAR whose block is the FEE envelope, labelled with the owner's group key.
   const car = parsed(SAMPLES[0]!.items[0]!.text).bytes
   const inner = envelopeInCar(car)
   assert.ok(inner)
@@ -187,11 +222,11 @@ test('every sample inspects, and its keys open it', async () => {
   assert.ok(open.ok && open.key && restricted.ok && !restricted.key && access.ok && access.key)
   assert.deepEqual(await unwrapWith(open.key, open.bytes), await unwrapWith(access.key, restricted.bytes))
 
-  // The Grants: one link for keyspace and for scope:team, two for the nested chain.
+  // The Grants: one link for the group key and for group:team, two for the nested chain.
   for (const [i, node, links] of [
-    [3, 'keyspace', 1],
-    [4, 'scope:team', 1],
-    [5, 'scope:team/alice', 2],
+    [3, 'groupKey', 1],
+    [4, 'group:team', 1],
+    [5, 'group:team/alice', 2],
   ] as const) {
     const grant = parsed(SAMPLES[i]!.items[0]!.text)
     const key = parseText(SAMPLES[i]!.items[1]!.text, { danger: true })
@@ -201,7 +236,7 @@ test('every sample inspects, and its keys open it', async () => {
     assert.equal(decodeDelivery(grant.bytes).chain.links.length, links)
   }
 
-  // The header: the keyspace Grant's chain, and its session key's request for the upload, which the gate serves.
+  // The header: the group key Grant's chain, and its session key's request for the upload, which the gate serves.
   const header = parsed(SAMPLES[6]!.items[0]!.text)
   const view = inspectBytes(header.bytes)
   assert.ok(view.kind === 'presentation' && !view.strictError && view.request)
@@ -215,14 +250,14 @@ test('every sample inspects, and its keys open it', async () => {
   })
   assert.equal(claim.bearer, privateKeyToAccount(session.key).address)
 
-  // The nested header: the nested Grant's chain (keyspace, then team/alice), and the agent's request.
+  // The nested header: the nested Grant's chain (group key, then team/alice), and the agent's request.
   const nested = inspectBytes(parsed(SAMPLES[7]!.items[0]!.text).bytes)
   assert.ok(nested.kind === 'presentation' && !nested.strictError && nested.chain)
   assert.deepEqual(
     nested.chain.links.map((link) => [link.node, link.maxDepth]),
     [
-      ['keyspace', 1],
-      ['scope:team/alice', 0],
+      ['groupKey', 1],
+      ['group:team/alice', 0],
     ]
   )
   const agent = parseText(SAMPLES[5]!.items[1]!.text, { danger: true })
@@ -233,8 +268,37 @@ test('every sample inspects, and its keys open it', async () => {
 
 test('a claim chain or request with a nonsense expiry still inspects', () => {
   const hex = (s: string) => Uint8Array.from(s.match(/../g)!, (b) => parseInt(b, 16))
-  for (const bytes of ['830181a10b617840', '830180a1011bffffffffffffffff']) {
+  for (const bytes of ['830281a10b617840', '830280a1011bffffffffffffffff']) {
     const view = inspectBytes(hex(bytes))
     assert.ok(view.fields.some((f) => f.value?.includes('not a valid time')))
   }
+})
+
+test("a private upload's share links, and the foc_grant request URL", async () => {
+  const [byOwner, bySession, request] = SAMPLES.slice(8) as typeof SAMPLES
+  for (const [sample, links, unverified] of [
+    [byOwner, 1, false],
+    [bySession, 2, true],
+  ] as const) {
+    const link = parseText(sample!.items[0]!.text, { danger: true })
+    assert.ok(link.ok && link.key, sample!.title)
+    assert.ok(link.notes.some((note) => note.includes('private upload') && note.includes('Delivery')))
+    assert.ok(link.notes.includes('Providers that hold the piece (s=): https://sp.invalid/pdp.'))
+    const view = inspectBytes(link.bytes)
+    assert.ok(view.kind === 'grant' && view.chain?.links.length === links && view.chain.links.at(-1)?.pieceCid)
+    const opened = await openWithKey(link.key, link.bytes, true)
+    assert.match(opened.node, /^piece:0x/)
+    assert.equal(opened.unverified === true, unverified)
+    // Another key is not the chain's bearer, verified or not
+    await assert.rejects(openWithKey(`0x${'ab'.repeat(32)}`, link.bytes, true), /another bearer/)
+  }
+
+  const url = parsed(request!.items[0]!.text)
+  assert.equal(url.source, 'foc_grant query')
+  assert.ok(url.notes.some((note) => note.includes('/download/')))
+  assert.equal(inspectBytes(url.bytes).kind, 'presentation')
+  assert.equal(parsed(`foc_grant=${request!.items[0]!.text.split('foc_grant=')[1]}`).source, 'foc_grant query')
+
+  const badProvider = byOwner!.items[0]!.text.replace(/&s=[^&]*/, `&s=${encodeURIComponent('javascript:alert(1)')}`)
+  assert.equal(parseText(badProvider, { danger: true }).ok, false)
 })

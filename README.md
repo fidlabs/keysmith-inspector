@@ -6,11 +6,14 @@ piece, byte by byte. Hover a field to light up its bytes, or a byte to find its 
 
 It accepts:
 
-- a Grant as filecoin-pin prints it (`fgr1_…`), or a `GROUP_KEY_GRANT=` / `KEYSPACE_GRANT=` line from `session.env`
-- a share link as filecoin-pin writes it (`…#v1/<root cid>&d=<grant>[&k=<Access key>]`): the grant is shown, and an
-  Access key in the link is never decoded
+- a Grant as filecoin-pin prints it (`fgr1_…`), or a `GROUP_KEY_GRANT=` line from `session.env`. filecoin-pin keeps one
+  Grant per group there, comma-separated: the inspector shows one at a time, with a button for each
+- a share link as filecoin-pin writes it (`…#v1/<root cid>&d=<grant>[&s=<providers>][&k=<Access key>]`): the grant is
+  shown, and an Access key in the link is never decoded. A private upload's link carries a Delivery in `d=` (a claim for
+  the piece, borne by the Access key, with the piece CID as its locator) and lists its providers in `s=`
 - a grant presentation the ways Curio's gate reads one: an `Authorization: FOC-Grant …` header, a bare
-  `Authorization: <base64url>`, Basic auth as user `FOC Grant` (or `FOC%20Grant`), or a `FOC Grant` cookie. It shows
+  `Authorization: <base64url>`, Basic auth as user `FOC Grant` (or `FOC%20Grant`), a `FOC Grant` cookie, or a
+  `foc_grant=` query (a `/download/<piece>?foc_grant=…` URL, as the viewer fetches a private upload). It shows
   the claim chain and the request a gating provider checks, and notes what Curio would refuse (another scheme
   spelling, standard base64). Another user's Basic password and other cookies are never decoded or shown
 - a FEE envelope file (`encrypted.fee`), or the CAR an encrypted upload is stored as (the envelope inside it is shown),
@@ -22,11 +25,14 @@ a web page is the wrong place to paste one.
 **Danger mode** (a switch, off on every page load) accepts them instead, for test and throwaway keys. It shows the
 key's address and public key, and opens a delivery with it: an open share link with its own `fak1_` key, a whole
 `session.env` (grant plus `SESSION_KEY`), or any link or Grant with a key pasted into the separate key box (for links
-whose Access key was sent separately), showing the unwrapped key. Turning the switch off clears the key box and any key
-on the page.
+whose Access key was sent separately), showing the unwrapped key. A chain that narrows a group to a piece (a session
+key's share of a private upload) can be verified only with the piece's labels, which are inside the piece, so it opens
+unverified and says so: a provider's gate verifies it. Turning the switch off clears the key box and any key on the
+page.
 
 A folded "Test data to try" section at the bottom has samples made with throwaway keys: an encrypted upload, open and
-restricted share links, and Grants for a keyspace, a scope and a two-link chain.
+restricted share links, Grants for a group key, a group and a two-link chain, Authorization headers, a private upload's
+share links (from the owner and from a session key) and a `foc_grant` request URL.
 
 Everything runs in the browser. The built page carries a Content Security Policy with `connect-src 'none'`, so it
 cannot make network requests; check it in your browser's developer tools.
@@ -34,6 +40,8 @@ cannot make network requests; check it in your browser's developer tools.
 ## Develop
 
 Requires Node 24 and pnpm (`corepack enable`).
+
+It reads Keysmith format 2 (keysmith 0.2.0: group keys and groups), and refuses keysmith 0.1.0 data.
 
 ```bash
 pnpm install
