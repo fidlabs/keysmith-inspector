@@ -41,8 +41,7 @@ cannot make network requests; check it in your browser's developer tools.
 
 Requires Node 24 and pnpm (`corepack enable`).
 
-It reads Keysmith format 2 (keysmith 0.2.0: group keys and groups), and refuses keysmith 0.1.0 data. Until 0.2.0
-is on npm, `@filoz/keysmith` is vendored (`vendor/`, synapse-sdk commit 061b1110).
+It reads Keysmith format 2 (keysmith 0.2.0: group keys and groups), and refuses keysmith 0.1.0 data.
 
 ```bash
 pnpm install
